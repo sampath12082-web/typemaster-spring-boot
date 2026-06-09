@@ -10,6 +10,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+
 @Service
 public class UserService {
 
@@ -40,8 +42,8 @@ public class UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         user = userRepository.save(user);
-        String token = jwtUtil.generateToken(user.getUsername());
-        return new AuthResponse(token, user.getUsername(), user.getId());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -50,8 +52,13 @@ public class UserService {
         );
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        String token = jwtUtil.generateToken(user.getUsername());
-        return new AuthResponse(token, user.getUsername(), user.getId());
+        String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
+        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
+    }
+
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
     }
 
     public UserStatsDto getUserStats(String username) {

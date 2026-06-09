@@ -1,12 +1,17 @@
 package com.typingtutor.controller;
 
-import com.typingtutor.dto.*;
+import com.typingtutor.dto.AuthResponse;
+import com.typingtutor.dto.LoginRequest;
+import com.typingtutor.dto.RegisterRequest;
+import com.typingtutor.entity.User;
 import com.typingtutor.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,18 +23,23 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.ok(userService.register(request));
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest req) {
+        return ResponseEntity.ok(userService.login(req));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(userService.login(request));
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest req) {
+        return ResponseEntity.ok(userService.register(req));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserStatsDto> getMe(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(userService.getUserStats(userDetails.getUsername()));
+    public ResponseEntity<?> me(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getUserByUsername(userDetails.getUsername());
+        return ResponseEntity.ok(Map.of(
+            "username", user.getUsername(),
+            "role",     user.getRole().name(),
+            "email",    user.getEmail() != null ? user.getEmail() : ""
+        ));
     }
 }
