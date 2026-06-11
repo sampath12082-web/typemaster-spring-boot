@@ -6,10 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 
 @Component
@@ -36,10 +36,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             String username = jwtUtil.extractUsername(token);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                if (jwtUtil.isTokenValid(token, userDetails)) {
+                UserPrincipal principal = (UserPrincipal) userDetailsService.loadUserByUsername(username);
+                if (jwtUtil.isTokenValid(token, principal)) {
+                    // Block users who have an email address but haven't verified it yet.
+                    // Users with no email are allowed through — dashboard shows a reminder popup.
+                    String userEmail = principal.getUser().getEmail();
+                    boolean hasEmail = userEmail != null && !userEmail.isBlank();
+                    if (hasEmail && !principal.isEmailVerified()) {
+                        String path = request.getRequestURI();
+                        if (!path.startsWith("/api/auth/") && !path.startsWith("/api/certificates/")) {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\":\"EMAIL_NOT_VERIFIED\"}");
+                            return;
+                        }
+                    }
                     UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }

@@ -11,27 +11,29 @@ import java.util.List;
 
 public interface UserPerformanceRepository extends JpaRepository<UserPerformance, Long> {
 
-    // Used by PerformanceService + UserService
     List<UserPerformance> findByUserIdOrderByCompletedAtDesc(Long userId);
-
-    // Used by AdminService
     List<UserPerformance> findByUserIdOrderByWpmDesc(Long userId);
 
-    // Used by LessonService
     @Query("SELECT p FROM UserPerformance p WHERE p.user.id = :userId AND p.lesson.id = :lessonId ORDER BY p.wpm DESC")
     List<UserPerformance> findAllByUserIdAndLessonId(@Param("userId") Long userId, @Param("lessonId") Long lessonId);
 
-    // Used by UserService + LessonService
     @Query("SELECT DISTINCT p.lesson.id FROM UserPerformance p WHERE p.user.id = :userId")
     List<Long> findCompletedLessonIdsByUserId(@Param("userId") Long userId);
 
-    // Used by UserService
     @Query("SELECT AVG(p.wpm) FROM UserPerformance p WHERE p.user.id = :userId")
     Double findAverageWpmByUserId(@Param("userId") Long userId);
 
-    // Used by AdminService when deleting a user
+    // Last 10 sessions for AI profiling
+    @Query("SELECT p FROM UserPerformance p JOIN FETCH p.lesson WHERE p.user.id = :userId ORDER BY p.completedAt DESC")
+    List<UserPerformance> findRecentByUserIdWithLesson(@Param("userId") Long userId);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM UserPerformance p WHERE p.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM UserPerformance p WHERE p.user.id = :userId AND p.lesson.id IN :lessonIds")
+    void deleteByUserIdAndLessonIdIn(@Param("userId") Long userId, @Param("lessonIds") java.util.List<Long> lessonIds);
 }

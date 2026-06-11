@@ -38,7 +38,17 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/login", "/api/auth/register", "/h2-console/**").permitAll()
+                .requestMatchers(
+                    "/api/auth/login",
+                    "/api/auth/register",
+                    "/api/auth/verify-email",
+                    "/api/auth/resend-otp",
+                    "/api/auth/verify-otp",
+                    "/api/auth/change-password",
+                    "/api/auth/forgot-password",
+                    "/api/certificates/*",          // public verification
+                    "/h2-console/**"
+                ).permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

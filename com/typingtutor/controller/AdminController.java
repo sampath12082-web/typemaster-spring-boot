@@ -40,6 +40,12 @@ public class AdminController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/users/{userId}/toggle-active")
+    public ResponseEntity<Map<String, Object>> toggleActive(@PathVariable Long userId) {
+        boolean active = adminService.toggleActive(userId);
+        return ResponseEntity.ok(Map.of("active", active));
+    }
+
     @PostMapping("/users/{userId}/reset-password")
     public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long userId) {
         String tempPassword = adminService.resetPassword(userId);

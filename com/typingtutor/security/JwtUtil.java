@@ -19,11 +19,12 @@ public class JwtUtil {
     @Value("${app.jwt.expiration-ms}")
     private long jwtExpirationMs;
 
+    private static final long CHANGE_PASSWORD_EXPIRY_MS = 15 * 60 * 1000; // 15 minutes
+
     private SecretKey key() {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
     }
 
-    /** Generate token with role claim (new — used by updated UserService) */
     public String generateToken(String username, String role) {
         return Jwts.builder()
                 .subject(username)
@@ -34,9 +35,18 @@ public class JwtUtil {
                 .compact();
     }
 
-    /** Backward-compat overload — defaults role to USER */
     public String generateToken(String username) {
         return generateToken(username, "USER");
+    }
+
+    public String generateChangePasswordToken(String username) {
+        return Jwts.builder()
+                .subject(username)
+                .claim("purpose", "CHANGE_PASSWORD")
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + CHANGE_PASSWORD_EXPIRY_MS))
+                .signWith(key())
+                .compact();
     }
 
     public String extractUsername(String token) {
@@ -50,7 +60,20 @@ public class JwtUtil {
         return role != null ? role.toString() : "USER";
     }
 
-    /** Called by JwtAuthFilter (original method name) */
+    /** Returns username if the token is a valid CHANGE_PASSWORD token, null otherwise. */
+    public String extractChangePasswordUsername(String token) {
+        try {
+            Claims claims = Jwts.parser().verifyWith(key()).build()
+                    .parseSignedClaims(token).getPayload();
+            Object purpose = claims.get("purpose");
+            if (!"CHANGE_PASSWORD".equals(purpose)) return null;
+            if (claims.getExpiration().before(new Date())) return null;
+            return claims.getSubject();
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
             String username = extractUsername(token);

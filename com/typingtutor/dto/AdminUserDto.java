@@ -10,6 +10,7 @@ public class AdminUserDto {
     private double avgWpm;
     private double avgAccuracy;
     private int bestWpm;
+    private boolean active = true;
 
     public AdminUserDto() {}
 
@@ -31,4 +32,6 @@ public class AdminUserDto {
     public void setAvgAccuracy(double avgAccuracy) { this.avgAccuracy = avgAccuracy; }
     public int getBestWpm() { return bestWpm; }
     public void setBestWpm(int bestWpm) { this.bestWpm = bestWpm; }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 }

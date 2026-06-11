@@ -1,5 +1,7 @@
 package com.typingtutor.controller;
 
+import com.typingtutor.service.PerformanceService.LessonLockedException;
+import com.typingtutor.service.UserService.EmailNotVerifiedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -15,6 +17,16 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(LessonLockedException.class)
+    public ResponseEntity<Map<String, String>> handleLessonLocked(LessonLockedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    public ResponseEntity<Map<String, String>> handleEmailNotVerified(EmailNotVerifiedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+    }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException e) {

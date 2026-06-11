@@ -2,6 +2,7 @@ package com.typingtutor.controller;
 
 import com.typingtutor.dto.InquiryDto;
 import com.typingtutor.dto.InquiryRequest;
+import com.typingtutor.dto.ReopenInquiryRequest;
 import com.typingtutor.service.InquiryService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -33,5 +34,15 @@ public class InquiryController {
     public ResponseEntity<List<InquiryDto>> mine(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(inquiryService.getMyInquiries(userDetails.getUsername()));
+    }
+
+    /** Feature E — reopen a resolved inquiry (max 3 times). */
+    @PostMapping("/{id}/reopen")
+    public ResponseEntity<InquiryDto> reopen(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ReopenInquiryRequest req) {
+        return ResponseEntity.ok(
+            inquiryService.reopenInquiry(id, userDetails.getUsername(), req.getReason()));
     }
 }

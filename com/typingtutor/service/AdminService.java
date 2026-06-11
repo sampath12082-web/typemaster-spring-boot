@@ -4,6 +4,8 @@ import com.typingtutor.dto.AdminUserDto;
 import com.typingtutor.dto.InquiryDto;
 import com.typingtutor.entity.*;
 import com.typingtutor.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 @Service
 public class AdminService {
 
+    private static final Logger log = LoggerFactory.getLogger(AdminService.class);
     private static final String PASSWORD_CHARS =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
 
@@ -44,6 +47,7 @@ public class AdminService {
                 dto.setUsername(u.getUsername());
                 dto.setEmail(u.getEmail());
                 dto.setRole(u.getRole().name());
+                dto.setActive(u.isActive());
                 dto.setTotalRuns(perfs.size());
                 if (!perfs.isEmpty()) {
                     dto.setAvgWpm(perfs.stream().mapToInt(UserPerformance::getWpm).average().orElse(0));
@@ -58,11 +62,15 @@ public class AdminService {
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already taken: " + username);
         }
+        // Admin-created users must change password on first login
         User user = User.builder()
             .username(username)
             .email(email)
             .password(passwordEncoder.encode(password))
             .role(Role.USER)
+            .emailVerified(true)        // admin-created users skip email verification
+            .passwordChanged(false)     // force password change on first login
+            .placementCompleted(true)   // admin-created users skip placement test
             .build();
         user = userRepository.save(user);
         AdminUserDto dto = new AdminUserDto();
@@ -71,6 +79,15 @@ public class AdminService {
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole().name());
         return dto;
+    }
+
+    @Transactional
+    public boolean toggleActive(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
+        user.setActive(!user.isActive());
+        userRepository.save(user);
+        return user.isActive();
     }
 
     @Transactional
@@ -86,6 +103,7 @@ public class AdminService {
             .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         String tempPassword = generateTemporaryPassword();
         user.setPassword(passwordEncoder.encode(tempPassword));
+        user.setPasswordChanged(false); // force change on next login
         userRepository.save(user);
         return tempPassword;
     }

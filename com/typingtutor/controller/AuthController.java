@@ -1,8 +1,6 @@
 package com.typingtutor.controller;
 
-import com.typingtutor.dto.AuthResponse;
-import com.typingtutor.dto.LoginRequest;
-import com.typingtutor.dto.RegisterRequest;
+import com.typingtutor.dto.*;
 import com.typingtutor.entity.User;
 import com.typingtutor.service.UserService;
 import jakarta.validation.Valid;
@@ -11,6 +9,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -23,23 +22,82 @@ public class AuthController {
         this.userService = userService;
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
+        return ResponseEntity.ok(userService.register(req));
+    }
+
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest req) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
         return ResponseEntity.ok(userService.login(req));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest req) {
-        return ResponseEntity.ok(userService.register(req));
+    @PostMapping("/verify-email")
+    public ResponseEntity<AuthResponse> verifyEmail(@Valid @RequestBody OtpVerifyRequest req) {
+        return ResponseEntity.ok(userService.verifyEmail(req.getEmail(), req.getOtp()));
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<Map<String, Object>> resendOtp(@Valid @RequestBody ResendOtpRequest req) {
+        return ResponseEntity.ok(userService.resendOtp(req.getEmail(), req.getPurpose()));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<Map<String, String>> verifyOtp(@Valid @RequestBody OtpVerifyRequest req) {
+        String purpose = req.getPurpose() != null ? req.getPurpose() : "FIRST_LOGIN";
+        return ResponseEntity.ok(userService.verifyOtp(req.getEmail(), req.getOtp(), purpose));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(
+            @Valid @RequestBody ChangePasswordRequest req) {
+        userService.changePassword(req.getChangePasswordToken(), req.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "Password changed successfully."));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, Object>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest req) {
+        return ResponseEntity.ok(userService.forgotPassword(req.getEmail()));
     }
 
     @GetMapping("/me")
     public ResponseEntity<?> me(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(Map.of(
-            "username", user.getUsername(),
-            "role",     user.getRole().name(),
-            "email",    user.getEmail() != null ? user.getEmail() : ""
-        ));
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("username",           user.getUsername());
+        resp.put("userId",             user.getId());
+        resp.put("role",               user.getRole().name());
+        resp.put("email",              user.getEmail() != null ? user.getEmail() : "");
+        resp.put("fullName",           user.getFullName() != null ? user.getFullName() : "");
+        resp.put("dateOfBirth",        user.getDateOfBirth() != null ? user.getDateOfBirth().toString() : "");
+        resp.put("student",            user.isStudent());
+        resp.put("schoolName",         user.getSchoolName() != null ? user.getSchoolName() : "");
+        resp.put("classYear",          user.getClassYear() != null ? user.getClassYear() : "");
+        resp.put("courseSpecialization", user.getCourseSpecialization() != null ? user.getCourseSpecialization() : "");
+        resp.put("occupation",         user.getOccupation() != null ? user.getOccupation() : "");
+        resp.put("placementCompleted", user.isPlacementCompleted());
+        resp.put("recommendedTier",    user.getRecommendedTier() != null ? user.getRecommendedTier() : "");
+        resp.put("emailVerified",      user.isEmailVerified());
+        return ResponseEntity.ok(resp);
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<?> updateProfile(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ProfileUpdateRequest req) {
+        User user = userService.updateProfile(userDetails.getUsername(), req);
+        Map<String, Object> resp = new LinkedHashMap<>();
+        resp.put("username",           user.getUsername());
+        resp.put("email",              user.getEmail() != null ? user.getEmail() : "");
+        resp.put("fullName",           user.getFullName() != null ? user.getFullName() : "");
+        resp.put("dateOfBirth",        user.getDateOfBirth() != null ? user.getDateOfBirth().toString() : "");
+        resp.put("student",            user.isStudent());
+        resp.put("schoolName",         user.getSchoolName() != null ? user.getSchoolName() : "");
+        resp.put("classYear",          user.getClassYear() != null ? user.getClassYear() : "");
+        resp.put("courseSpecialization", user.getCourseSpecialization() != null ? user.getCourseSpecialization() : "");
+        resp.put("occupation",         user.getOccupation() != null ? user.getOccupation() : "");
+        resp.put("message",            "Profile updated successfully.");
+        return ResponseEntity.ok(resp);
     }
 }
