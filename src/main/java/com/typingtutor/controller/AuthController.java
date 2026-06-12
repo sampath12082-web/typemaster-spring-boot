@@ -2,6 +2,7 @@ package com.typingtutor.controller;
 
 import com.typingtutor.dto.*;
 import com.typingtutor.entity.User;
+import com.typingtutor.service.ProfileUpdateResult;
 import com.typingtutor.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -78,7 +79,9 @@ public class AuthController {
         resp.put("occupation",         user.getOccupation() != null ? user.getOccupation() : "");
         resp.put("placementCompleted", userService.isEffectivePlacementCompleted(user));
         resp.put("recommendedTier",    user.getRecommendedTier() != null ? user.getRecommendedTier() : "");
-        resp.put("emailVerified",      user.isEmailVerified());
+        resp.put("emailVerified",               user.isEmailVerified());
+        resp.put("emailVerificationDeadline",   user.getEmailVerificationDeadline() != null
+                ? user.getEmailVerificationDeadline().toString() : null);
         return ResponseEntity.ok(resp);
     }
 
@@ -92,7 +95,8 @@ public class AuthController {
     public ResponseEntity<?> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody ProfileUpdateRequest req) {
-        User user = userService.updateProfile(userDetails.getUsername(), req);
+        ProfileUpdateResult result = userService.updateProfile(userDetails.getUsername(), req);
+        User user = result.user();
         Map<String, Object> resp = new LinkedHashMap<>();
         resp.put("username",           user.getUsername());
         resp.put("email",              user.getEmail() != null ? user.getEmail() : "");
@@ -103,6 +107,11 @@ public class AuthController {
         resp.put("classYear",          user.getClassYear() != null ? user.getClassYear() : "");
         resp.put("courseSpecialization", user.getCourseSpecialization() != null ? user.getCourseSpecialization() : "");
         resp.put("occupation",         user.getOccupation() != null ? user.getOccupation() : "");
+        resp.put("emailVerified",               user.isEmailVerified());
+        resp.put("emailVerificationDeadline",   user.getEmailVerificationDeadline() != null
+                ? user.getEmailVerificationDeadline().toString() : null);
+        resp.put("emailChanged",       result.emailChanged());
+        if (result.devOtp() != null) resp.put("devOtp", result.devOtp());
         resp.put("message",            "Profile updated successfully.");
         return ResponseEntity.ok(resp);
     }

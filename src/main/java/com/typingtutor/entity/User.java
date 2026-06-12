@@ -2,6 +2,7 @@ package com.typingtutor.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "app_users")
@@ -66,6 +67,9 @@ public class User {
     @Column(name = "password_changed", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean passwordChanged = true;
 
+    @Column(name = "email_verification_deadline")
+    private LocalDateTime emailVerificationDeadline;
+
     public User() {}
 
     public Long getId() { return id; }
@@ -104,6 +108,8 @@ public class User {
     public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
     public boolean isPasswordChanged() { return passwordChanged; }
     public void setPasswordChanged(boolean passwordChanged) { this.passwordChanged = passwordChanged; }
+    public LocalDateTime getEmailVerificationDeadline() { return emailVerificationDeadline; }
+    public void setEmailVerificationDeadline(LocalDateTime emailVerificationDeadline) { this.emailVerificationDeadline = emailVerificationDeadline; }
 
     public static Builder builder() { return new Builder(); }
 

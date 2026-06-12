@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,7 @@ public class UserService {
         EmailVerification ev = evOpt.get();
         User user = ev.getUser();
         user.setEmailVerified(true);
+        user.setEmailVerificationDeadline(null);
         userRepository.save(user);
         otpService.markUsed(ev.getId());
 
@@ -145,6 +147,14 @@ public class UserService {
         log.info("[LOGIN] hasEmail={} for username='{}'", hasEmail, request.getUsername());
 
         if (hasEmail && !user.isEmailVerified() && user.getRole() != com.typingtutor.entity.Role.ADMIN) {
+            if (user.getEmailVerificationDeadline() != null &&
+                    user.getEmailVerificationDeadline().isBefore(LocalDateTime.now())) {
+                user.setActive(false);
+                userRepository.save(user);
+                auditLogService.log(user.getUsername(), "EMAIL_VERIFICATION_EXPIRED",
+                        "Account disabled — email not verified within grace period");
+                throw new IllegalArgumentException("ACCOUNT_INACTIVE");
+            }
             log.warn("[LOGIN] Blocked — email not verified for username='{}'", request.getUsername());
             throw new EmailNotVerifiedException("EMAIL_NOT_VERIFIED");
         }
@@ -226,9 +236,11 @@ public class UserService {
     }
 
     @Transactional
-    public User updateProfile(String username, ProfileUpdateRequest req) {
+    public ProfileUpdateResult updateProfile(String username, ProfileUpdateRequest req) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
+        boolean emailChanged = false;
+        String devOtp = null;
         if (req.getFullName() != null) user.setFullName(req.getFullName());
         if (req.getEmail() != null && !req.getEmail().isBlank()
                 && !req.getEmail().equals(user.getEmail())) {
@@ -237,8 +249,12 @@ public class UserService {
             }
             user.setEmail(req.getEmail());
             user.setEmailVerified(false);
+            user.setEmailVerificationDeadline(LocalDateTime.now().plusDays(2));
             EmailVerification ev = otpService.createOtp(user.getId(), "VERIFY_EMAIL");
             emailService.sendOtp(req.getEmail(), ev.getOtpCode(), "VERIFY_EMAIL", user.getUsername());
+            if (!emailService.isMailEnabled()) devOtp = ev.getOtpCode();
+            auditLogService.log(username, "EMAIL_UPDATED", "Email changed to: " + req.getEmail());
+            emailChanged = true;
         }
         if (req.getDateOfBirth() != null) user.setDateOfBirth(req.getDateOfBirth());
         if (req.getStudent() != null) user.setStudent(req.getStudent());
@@ -246,7 +262,7 @@ public class UserService {
         if (req.getClassYear() != null) user.setClassYear(req.getClassYear());
         if (req.getCourseSpecialization() != null) user.setCourseSpecialization(req.getCourseSpecialization());
         if (req.getOccupation() != null) user.setOccupation(req.getOccupation());
-        return userRepository.save(user);
+        return new ProfileUpdateResult(userRepository.save(user), devOtp, emailChanged);
     }
 
     public User getUserByUsername(String username) {
