@@ -1,6 +1,7 @@
 package com.typingtutor.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,8 +24,9 @@ public class Certificate {
     @Column(name = "difficulty_level", nullable = false, length = 20)
     private DifficultyLevel difficultyLevel;
 
-    @Column(name = "issued_at", nullable = false)
-    private LocalDateTime issuedAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(name = "issued_at", nullable = false, updatable = false)
+    private LocalDateTime issuedAt;
 
     @Column(name = "certificate_id", nullable = false, unique = true, length = 36)
     private String certificateId;

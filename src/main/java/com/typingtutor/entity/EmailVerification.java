@@ -1,6 +1,7 @@
 package com.typingtutor.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,8 +29,12 @@ public class EmailVerification {
     @Column(nullable = false)
     private boolean used = false;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "attempt_count", nullable = false, columnDefinition = "INTEGER DEFAULT 0")
+    private int attemptCount = 0;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     public EmailVerification() {}
 
@@ -47,4 +52,6 @@ public class EmailVerification {
     public void setUsed(boolean used) { this.used = used; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public int getAttemptCount() { return attemptCount; }
+    public void setAttemptCount(int attemptCount) { this.attemptCount = attemptCount; }
 }

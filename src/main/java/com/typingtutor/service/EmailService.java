@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import jakarta.mail.internet.MimeMessage;
 
@@ -39,7 +40,7 @@ public class EmailService {
 
     public void sendWelcome(String toEmail, String userName) {
         String subject = "Welcome to TypeMaster!";
-        String body = "<h2>Welcome, " + userName + "!</h2>"
+        String body = "<h2>Welcome, " + HtmlUtils.htmlEscape(userName) + "!</h2>"
                 + "<p>Your account has been successfully created and verified.</p>"
                 + "<p>Start practising to improve your typing speed and accuracy.</p>";
         send(toEmail, subject, body);
@@ -56,8 +57,8 @@ public class EmailService {
             helper.setFrom(fromAddress);
             helper.setTo(toEmail);
             helper.setSubject("Your TypeMaster " + tier + " Certificate");
-            helper.setText("<p>Congratulations, " + userName + "!</p>"
-                    + "<p>Please find your " + tier + " typing certificate attached.</p>", true);
+            helper.setText("<p>Congratulations, " + HtmlUtils.htmlEscape(userName) + "!</p>"
+                    + "<p>Please find your " + HtmlUtils.htmlEscape(tier) + " typing certificate attached.</p>", true);
             helper.addAttachment("TypeMaster_Certificate_" + tier + ".pdf",
                     () -> new java.io.ByteArrayInputStream(pdfBytes), "application/pdf");
             mailSender.send(msg);
@@ -69,7 +70,7 @@ public class EmailService {
 
     private void send(String toEmail, String subject, String htmlBody) {
         if (!mailEnabled) {
-            log.info("Mail disabled — would send to={} subject='{}' body={}", toEmail, subject, htmlBody);
+            log.info("Mail disabled — would send to={} subject='{}'", toEmail, subject);
             return;
         }
         try {
@@ -102,7 +103,7 @@ public class EmailService {
             case "RESET_PASSWORD" -> "reset your password";
             default               -> "complete the requested action";
         };
-        return "<h2>Hello, " + userName + "!</h2>"
+        return "<h2>Hello, " + HtmlUtils.htmlEscape(userName) + "!</h2>"
                 + "<p>Use the following OTP to " + action + ":</p>"
                 + "<h1 style='letter-spacing:6px;color:#4F46E5'>" + otp + "</h1>"
                 + "<p>This code expires in <strong>30 minutes</strong>.</p>"

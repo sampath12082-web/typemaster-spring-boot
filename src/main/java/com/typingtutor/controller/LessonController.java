@@ -2,6 +2,7 @@ package com.typingtutor.controller;
 
 import com.typingtutor.dto.LessonWithStatusDto;
 import com.typingtutor.entity.Lesson;
+import com.typingtutor.security.UserPrincipal;
 import com.typingtutor.service.LessonGenerationService;
 import com.typingtutor.service.LessonService;
 import org.springframework.http.ResponseEntity;
@@ -40,10 +41,8 @@ public class LessonController {
 
     /** Feature F — generate next AI lesson once all standard ADVANCED lessons are complete. */
     @PostMapping("/generate-next")
-    public ResponseEntity<?> generateNext(@AuthenticationPrincipal UserDetails userDetails) {
-        com.typingtutor.entity.User user =
-                ((com.typingtutor.security.UserPrincipal) userDetails).getUser();
-        Lesson generated = lessonGenerationService.generateAdvancedLessonForUser(user.getId());
+    public ResponseEntity<?> generateNext(@AuthenticationPrincipal UserPrincipal userDetails) {
+        Lesson generated = lessonGenerationService.generateAdvancedLessonForUser(userDetails.getUser().getId());
         return ResponseEntity.accepted().body(Map.of(
             "message", "New AI lesson generated successfully.",
             "lessonId", generated.getId(),

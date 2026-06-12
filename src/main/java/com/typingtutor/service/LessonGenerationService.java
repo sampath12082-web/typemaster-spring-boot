@@ -43,6 +43,7 @@ public class LessonGenerationService {
     private final UserPerformanceRepository performanceRepository;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public LessonGenerationService(LessonRepository lessonRepository,
                                    UserPerformanceRepository performanceRepository,
@@ -124,7 +125,6 @@ public class LessonGenerationService {
                 "messages", List.of(java.util.Map.of("role", "user", "content", prompt))
             ));
 
-            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(aiApiUrl))
                     .header("Content-Type", "application/json")
@@ -133,7 +133,7 @@ public class LessonGenerationService {
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody))
                     .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
                 log.error("AI API returned status {}: {}", response.statusCode(), response.body());
                 return generatePlaceholderContent(weakArea);

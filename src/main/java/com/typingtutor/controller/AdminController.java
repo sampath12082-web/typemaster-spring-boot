@@ -4,6 +4,8 @@ import com.typingtutor.dto.AdminCreateUserRequest;
 import com.typingtutor.dto.AdminUserDto;
 import com.typingtutor.dto.InquiryDto;
 import com.typingtutor.dto.ResolveInquiryRequest;
+import com.typingtutor.entity.AuditLog;
+import com.typingtutor.repository.AuditLogRepository;
 import com.typingtutor.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,11 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
+    private final AuditLogRepository auditLogRepository;
 
-    public AdminController(AdminService adminService) {
+    public AdminController(AdminService adminService, AuditLogRepository auditLogRepository) {
         this.adminService = adminService;
+        this.auditLogRepository = auditLogRepository;
     }
 
     @GetMapping("/users")
@@ -60,7 +64,12 @@ public class AdminController {
     @PostMapping("/inquiries/{inquiryId}/resolve")
     public ResponseEntity<InquiryDto> resolveInquiry(
             @PathVariable Long inquiryId,
-            @RequestBody ResolveInquiryRequest req) {
+            @Valid @RequestBody ResolveInquiryRequest req) {
         return ResponseEntity.ok(adminService.resolveInquiry(inquiryId, req.getResponse()));
+    }
+
+    @GetMapping("/audit-logs")
+    public ResponseEntity<List<AuditLog>> auditLogs() {
+        return ResponseEntity.ok(auditLogRepository.findLatest(200));
     }
 }

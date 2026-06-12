@@ -62,6 +62,23 @@ public class PlacementService {
         return new PlacementResultDto(tier, startLessonId, wpm, accuracy);
     }
 
+    @Transactional
+    public PlacementResultDto skipPlacement(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        List<Lesson> basicLessons = lessonRepository.findByDifficultyLevelOrderByDisplayOrder(DifficultyLevel.BASIC);
+        Long startLessonId = basicLessons.isEmpty() ? null : basicLessons.get(0).getId();
+
+        user.setPlacementCompleted(true);
+        user.setRecommendedTier("BASIC");
+        user.setPlacementWpm(0);
+        userRepository.save(user);
+
+        log.debug("Placement skipped for user={}", username);
+        return new PlacementResultDto("BASIC", startLessonId, 0, 0.0);
+    }
+
     private String determineTier(int wpm) {
         if (wpm < 20) return "BASIC";
         if (wpm < 40) return "INTERMEDIATE";

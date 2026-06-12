@@ -103,7 +103,7 @@ public class ExamService {
 
         verifyTierComplete(user.getId(), level);
 
-        boolean passed = wpm >= exam.getMinWpm() && accuracy >= exam.getMinAccuracy();
+        boolean passed = wpm >= exam.getMinWpm() && accuracy >= exam.getMinAccuracy() - 0.005;
 
         ExamAttempt attempt = new ExamAttempt();
         attempt.setUser(user);

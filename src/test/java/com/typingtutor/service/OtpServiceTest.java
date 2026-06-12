@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,8 +76,8 @@ class OtpServiceTest {
 
     @Test
     void validateOtpReturnsFalseWhenNoRecord() {
-        when(verificationRepository.findLatestUnusedByEmail("test@example.com", VerificationPurpose.VERIFY_EMAIL))
-                .thenReturn(Optional.empty());
+        when(verificationRepository.findUnusedByEmail("test@example.com", VerificationPurpose.VERIFY_EMAIL))
+                .thenReturn(List.of());
 
         boolean valid = otpService.validateOtp("test@example.com", "123456", "VERIFY_EMAIL");
 
@@ -89,10 +90,12 @@ class OtpServiceTest {
         ev.setUser(user);
         ev.setOtpCode("999999");
         ev.setUsed(false);
+        ev.setAttemptCount(0);
         ev.setExpiresAt(LocalDateTime.now().minusMinutes(1)); // expired
+        when(verificationRepository.save(any())).thenReturn(ev);
 
-        when(verificationRepository.findLatestUnusedByEmail("test@example.com", VerificationPurpose.VERIFY_EMAIL))
-                .thenReturn(Optional.of(ev));
+        when(verificationRepository.findUnusedByEmail("test@example.com", VerificationPurpose.VERIFY_EMAIL))
+                .thenReturn(List.of(ev));
 
         boolean valid = otpService.validateOtp("test@example.com", "999999", "VERIFY_EMAIL");
 
@@ -105,10 +108,12 @@ class OtpServiceTest {
         ev.setUser(user);
         ev.setOtpCode("654321");
         ev.setUsed(false);
+        ev.setAttemptCount(0);
         ev.setExpiresAt(LocalDateTime.now().plusMinutes(25));
+        when(verificationRepository.save(any())).thenReturn(ev);
 
-        when(verificationRepository.findLatestUnusedByEmail("test@example.com", VerificationPurpose.VERIFY_EMAIL))
-                .thenReturn(Optional.of(ev));
+        when(verificationRepository.findUnusedByEmail("test@example.com", VerificationPurpose.VERIFY_EMAIL))
+                .thenReturn(List.of(ev));
 
         boolean valid = otpService.validateOtp("test@example.com", "654321", "VERIFY_EMAIL");
 

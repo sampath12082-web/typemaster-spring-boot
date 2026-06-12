@@ -82,6 +82,12 @@ public class AuthController {
         return ResponseEntity.ok(resp);
     }
 
+    @GetMapping("/ranking")
+    public ResponseEntity<Map<String, Object>> ranking(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(userService.getRanking(userDetails.getUsername()));
+    }
+
     @PutMapping("/me")
     public ResponseEntity<?> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,

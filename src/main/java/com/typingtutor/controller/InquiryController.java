@@ -3,23 +3,29 @@ package com.typingtutor.controller;
 import com.typingtutor.dto.InquiryDto;
 import com.typingtutor.dto.InquiryRequest;
 import com.typingtutor.dto.ReopenInquiryRequest;
+import com.typingtutor.service.HelpAgentService;
 import com.typingtutor.service.InquiryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/inquiries")
 public class InquiryController {
 
     private final InquiryService inquiryService;
+    private final HelpAgentService helpAgentService;
 
-    public InquiryController(InquiryService inquiryService) {
+    public InquiryController(InquiryService inquiryService, HelpAgentService helpAgentService) {
         this.inquiryService = inquiryService;
+        this.helpAgentService = helpAgentService;
     }
 
     @PostMapping
@@ -35,6 +41,15 @@ public class InquiryController {
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(inquiryService.getMyInquiries(userDetails.getUsername()));
     }
+
+    @PostMapping("/chat")
+    public ResponseEntity<Map<String, Object>> chat(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody ChatRequest req) {
+        return ResponseEntity.ok(helpAgentService.chat(req.message()));
+    }
+
+    record ChatRequest(@NotBlank @Size(max = 1000) String message) {}
 
     /** Feature E — reopen a resolved inquiry (max 3 times). */
     @PostMapping("/{id}/reopen")

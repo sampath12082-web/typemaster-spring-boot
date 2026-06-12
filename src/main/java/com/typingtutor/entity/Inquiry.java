@@ -1,6 +1,7 @@
 package com.typingtutor.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,8 +26,9 @@ public class Inquiry {
     @Column(nullable = false)
     private InquiryStatus status = InquiryStatus.OPEN;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @Column
     private String adminResponse;

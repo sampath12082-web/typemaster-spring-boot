@@ -2,6 +2,9 @@ package com.typingtutor.controller;
 
 import com.typingtutor.dto.PlacementResultDto;
 import com.typingtutor.service.PlacementService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +32,19 @@ public class PlacementController {
     @PostMapping("/submit")
     public ResponseEntity<PlacementResultDto> submit(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody PlacementSubmitBody body) {
+            @Valid @RequestBody PlacementSubmitBody body) {
         return ResponseEntity.ok(
             placementService.submitPlacement(userDetails.getUsername(), body.wpm(), body.accuracy()));
     }
 
-    record PlacementSubmitBody(@NotNull @Min(0) Integer wpm, @NotNull Double accuracy) {}
+    @PostMapping("/skip")
+    public ResponseEntity<PlacementResultDto> skip(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+            placementService.skipPlacement(userDetails.getUsername()));
+    }
+
+    record PlacementSubmitBody(
+            @NotNull @Min(0) Integer wpm,
+            @NotNull @DecimalMin("0.0") @DecimalMax("100.0") Double accuracy) {}
 }

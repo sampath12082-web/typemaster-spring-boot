@@ -71,7 +71,6 @@ public class LessonService {
         for (Lesson l : allLessons) {
             tierMinOrder.merge(l.getDifficultyLevel(), l.getDisplayOrder(), Math::min);
         }
-
         return toDto(lesson, perfsByLesson, tierMinOrder, allLessons);
     }
 

@@ -3,6 +3,7 @@ package com.typingtutor.service;
 import com.typingtutor.dto.*;
 import com.typingtutor.entity.User;
 import com.typingtutor.entity.EmailVerification;
+import com.typingtutor.entity.UserPerformance;
 import com.typingtutor.repository.UserPerformanceRepository;
 import com.typingtutor.repository.UserRepository;
 import com.typingtutor.security.JwtUtil;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -31,6 +33,7 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
     private final OtpService otpService;
     private final EmailService emailService;
+    private final AuditLogService auditLogService;
 
     public UserService(UserRepository userRepository,
                        UserPerformanceRepository performanceRepository,
@@ -38,7 +41,8 @@ public class UserService {
                        JwtUtil jwtUtil,
                        AuthenticationManager authenticationManager,
                        OtpService otpService,
-                       EmailService emailService) {
+                       EmailService emailService,
+                       AuditLogService auditLogService) {
         this.userRepository = userRepository;
         this.performanceRepository = performanceRepository;
         this.passwordEncoder = passwordEncoder;
@@ -46,6 +50,7 @@ public class UserService {
         this.authenticationManager = authenticationManager;
         this.otpService = otpService;
         this.emailService = emailService;
+        this.auditLogService = auditLogService;
     }
 
     @Transactional
@@ -99,6 +104,7 @@ public class UserService {
         otpService.markUsed(ev.getId());
 
         emailService.sendWelcome(user.getEmail(), user.getUsername());
+        auditLogService.log(user.getUsername(), "EMAIL_VERIFIED", "Email verified: " + user.getEmail());
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
         log.debug("Email verified for user={}", user.getUsername());
         return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
@@ -159,6 +165,7 @@ public class UserService {
         }
 
         log.info("[LOGIN] Success — issuing token for username='{}'", request.getUsername());
+        auditLogService.log(user.getUsername(), "LOGIN", "Successful login");
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
         return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
     }
@@ -223,11 +230,15 @@ public class UserService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
         if (req.getFullName() != null) user.setFullName(req.getFullName());
-        if (req.getEmail() != null && !req.getEmail().isBlank()) {
-            if (!req.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(req.getEmail())) {
+        if (req.getEmail() != null && !req.getEmail().isBlank()
+                && !req.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(req.getEmail())) {
                 throw new IllegalArgumentException("Email already registered: " + req.getEmail());
             }
             user.setEmail(req.getEmail());
+            user.setEmailVerified(false);
+            EmailVerification ev = otpService.createOtp(user.getId(), "VERIFY_EMAIL");
+            emailService.sendOtp(req.getEmail(), ev.getOtpCode(), "VERIFY_EMAIL", user.getUsername());
         }
         if (req.getDateOfBirth() != null) user.setDateOfBirth(req.getDateOfBirth());
         if (req.getStudent() != null) user.setStudent(req.getStudent());
@@ -254,11 +265,31 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         UserStatsDto stats = new UserStatsDto();
         stats.setUsername(user.getUsername());
-        stats.setLessonsCompleted(performanceRepository.findCompletedLessonIdsByUserId(user.getId()).size());
+        stats.setLessonsCompleted((int) performanceRepository.countDistinctLessonsByUserId(user.getId()));
         Double avgWpm = performanceRepository.findAverageWpmByUserId(user.getId());
         stats.setAverageWpm(avgWpm != null ? Math.round(avgWpm * 10.0) / 10.0 : 0.0);
-        stats.setTotalCompleted(performanceRepository.findByUserIdOrderByCompletedAtDesc(user.getId()).size());
+        stats.setTotalCompleted((int) performanceRepository.countByUserId(user.getId()));
         return stats;
+    }
+
+    public Map<String, Object> getRanking(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        long higher    = performanceRepository.countUsersRankedHigher(user.getId());
+        long typists   = performanceRepository.countTypists();
+        long totalUsers = userRepository.count();
+        int  rank       = (int) higher + 1;
+        int  bestWpm    = 0;
+        List<UserPerformance> bests = performanceRepository.findByUserIdOrderByWpmDesc(user.getId());
+        if (!bests.isEmpty()) bestWpm = bests.get(0).getWpm();
+        int percentile = typists > 0 ? (int) Math.round(100.0 * (typists - higher) / typists) : 100;
+        Map<String, Object> r = new java.util.LinkedHashMap<>();
+        r.put("rank",        rank);
+        r.put("totalTypists", (int) typists);
+        r.put("totalUsers",  (int) totalUsers);
+        r.put("userBestWpm", bestWpm);
+        r.put("percentile",  percentile);
+        return r;
     }
 
     public static class EmailNotVerifiedException extends RuntimeException {

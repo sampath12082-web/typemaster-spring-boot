@@ -5,6 +5,7 @@ import com.typingtutor.dto.ExamAttemptDto;
 import com.typingtutor.dto.ExamDto;
 import com.typingtutor.dto.ExamStatusDto;
 import com.typingtutor.dto.ExamSubmitRequest;
+import com.typingtutor.security.UserPrincipal;
 import com.typingtutor.service.CertificateService;
 import com.typingtutor.service.ExamService;
 import jakarta.validation.Valid;
@@ -52,10 +53,8 @@ public class ExamController {
 
     @GetMapping("/api/certificates")
     public ResponseEntity<List<CertificateDto>> getMyCertificates(
-            @AuthenticationPrincipal UserDetails userDetails) {
-        com.typingtutor.entity.User user =
-                ((com.typingtutor.security.UserPrincipal) userDetails).getUser();
-        return ResponseEntity.ok(certificateService.getUserCertificates(user.getId()));
+            @AuthenticationPrincipal UserPrincipal userDetails) {
+        return ResponseEntity.ok(certificateService.getUserCertificates(userDetails.getUser().getId()));
     }
 
     /** Public endpoint — no auth required (permitted in SecurityConfig). */
