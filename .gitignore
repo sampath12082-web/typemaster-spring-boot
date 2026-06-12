@@ -1,9 +1,26 @@
-target/
-data/*.mv.db
-data/*.trace.db
-*.log
+# ── Sub-repos (each has its own GitHub remote) ───────
+backend/
+frontend/
+
+# ── Backend ──────────────────────────────────────────
+backend/target/
+backend/data/*.mv.db
+backend/data/*.trace.db
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application-*.properties
+!backend/src/main/resources/application.properties
+!backend/src/main/resources/application-local.properties.example
+
+# ── Frontend ──────────────────────────────────────────
+frontend/node_modules/
+frontend/dist/
+frontend/playwright-report/
+frontend/test-results/
+
+# ── OS / IDE ──────────────────────────────────────────
 .DS_Store
 Thumbs.db
+*.log
 .idea/
 .vscode/
 *.iml
