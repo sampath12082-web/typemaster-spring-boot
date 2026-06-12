@@ -26,4 +26,9 @@ public interface ExamAttemptRepository extends JpaRepository<ExamAttempt, Long> 
     @Transactional
     @Query("DELETE FROM ExamAttempt a WHERE a.user.id = :userId AND a.exam.id = :examId")
     void deleteByUserAndExam(@Param("userId") Long userId, @Param("examId") Long examId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM ExamAttempt a WHERE a.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

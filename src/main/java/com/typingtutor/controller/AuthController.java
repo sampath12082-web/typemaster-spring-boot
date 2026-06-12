@@ -76,7 +76,7 @@ public class AuthController {
         resp.put("classYear",          user.getClassYear() != null ? user.getClassYear() : "");
         resp.put("courseSpecialization", user.getCourseSpecialization() != null ? user.getCourseSpecialization() : "");
         resp.put("occupation",         user.getOccupation() != null ? user.getOccupation() : "");
-        resp.put("placementCompleted", user.isPlacementCompleted());
+        resp.put("placementCompleted", userService.isEffectivePlacementCompleted(user));
         resp.put("recommendedTier",    user.getRecommendedTier() != null ? user.getRecommendedTier() : "");
         resp.put("emailVerified",      user.isEmailVerified());
         return ResponseEntity.ok(resp);

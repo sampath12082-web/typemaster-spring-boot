@@ -106,13 +106,29 @@ public class UserService {
 
     @Transactional
     public Object login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
+        log.info("[LOGIN] Attempt for username='{}'", request.getUsername());
+
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+        } catch (Exception ex) {
+            log.warn("[LOGIN] Authentication failed for username='{}' — {}: {}",
+                    request.getUsername(), ex.getClass().getSimpleName(), ex.getMessage());
+            throw ex;
+        }
+
+        log.info("[LOGIN] Password OK for username='{}'", request.getUsername());
+
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        log.info("[LOGIN] User state — id={}, active={}, emailVerified={}, passwordChanged={}, email='{}'",
+                user.getId(), user.isActive(), user.isEmailVerified(),
+                user.isPasswordChanged(), user.getEmail());
+
         if (!user.isActive()) {
+            log.warn("[LOGIN] Blocked — account inactive for username='{}'", request.getUsername());
             throw new IllegalArgumentException("ACCOUNT_INACTIVE");
         }
 
@@ -120,12 +136,16 @@ public class UserService {
         // are allowed in and reminded via the dashboard popup instead.
         String userEmail = user.getEmail();
         boolean hasEmail = userEmail != null && !userEmail.isBlank();
+        log.info("[LOGIN] hasEmail={} for username='{}'", hasEmail, request.getUsername());
+
         if (hasEmail && !user.isEmailVerified() && user.getRole() != com.typingtutor.entity.Role.ADMIN) {
+            log.warn("[LOGIN] Blocked — email not verified for username='{}'", request.getUsername());
             throw new EmailNotVerifiedException("EMAIL_NOT_VERIFIED");
         }
 
         // First-login: force password change via OTP — skip for no-email users (can't send OTP)
         if (!user.isPasswordChanged() && hasEmail) {
+            log.info("[LOGIN] First-login OTP flow triggered for username='{}'", request.getUsername());
             EmailVerification ev = otpService.createOtp(user.getId(), "FIRST_LOGIN");
             emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "FIRST_LOGIN", user.getUsername());
             Map<String, Object> firstLogin = new HashMap<>();
@@ -138,6 +158,7 @@ public class UserService {
             return firstLogin;
         }
 
+        log.info("[LOGIN] Success — issuing token for username='{}'", request.getUsername());
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
         return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
     }
@@ -220,6 +241,12 @@ public class UserService {
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
+    }
+
+    // Legacy users who were created before the placement system have placementCompleted=false
+    // even though they've already done lessons. Treat them as completed if they have any records.
+    public boolean isEffectivePlacementCompleted(User user) {
+        return user.isPlacementCompleted() || performanceRepository.existsByUserId(user.getId());
     }
 
     public UserStatsDto getUserStats(String username) {

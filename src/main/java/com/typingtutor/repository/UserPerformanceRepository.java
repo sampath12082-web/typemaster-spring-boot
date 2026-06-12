@@ -13,6 +13,7 @@ public interface UserPerformanceRepository extends JpaRepository<UserPerformance
 
     List<UserPerformance> findByUserIdOrderByCompletedAtDesc(Long userId);
     List<UserPerformance> findByUserIdOrderByWpmDesc(Long userId);
+    boolean existsByUserId(Long userId);
 
     @Query("SELECT p FROM UserPerformance p WHERE p.user.id = :userId AND p.lesson.id = :lessonId ORDER BY p.wpm DESC")
     List<UserPerformance> findAllByUserIdAndLessonId(@Param("userId") Long userId, @Param("lessonId") Long lessonId);

@@ -25,15 +25,21 @@ public class AdminService {
     private final UserRepository userRepository;
     private final UserPerformanceRepository performanceRepository;
     private final InquiryRepository inquiryRepository;
+    private final ExamAttemptRepository examAttemptRepository;
+    private final CertificateRepository certificateRepository;
     private final PasswordEncoder passwordEncoder;
 
     public AdminService(UserRepository userRepository,
                         UserPerformanceRepository performanceRepository,
                         InquiryRepository inquiryRepository,
+                        ExamAttemptRepository examAttemptRepository,
+                        CertificateRepository certificateRepository,
                         PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.performanceRepository = performanceRepository;
         this.inquiryRepository = inquiryRepository;
+        this.examAttemptRepository = examAttemptRepository;
+        this.certificateRepository = certificateRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -92,7 +98,10 @@ public class AdminService {
 
     @Transactional
     public void deleteUser(Long userId) {
-        performanceRepository.deleteByUserId(userId);
+        // Delete in FK dependency order: deepest child first
+        certificateRepository.deleteByUserId(userId);   // FK: user_id + exam_attempt_id
+        examAttemptRepository.deleteByUserId(userId);   // FK: user_id
+        performanceRepository.deleteByUserId(userId);   // FK: user_id
         inquiryRepository.findByUserIdOrderByCreatedAtDesc(userId)
             .forEach(inquiryRepository::delete);
         userRepository.deleteById(userId);
@@ -103,7 +112,10 @@ public class AdminService {
             .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         String tempPassword = generateTemporaryPassword();
         user.setPassword(passwordEncoder.encode(tempPassword));
-        user.setPasswordChanged(false); // force change on next login
+        // No-email users can't complete the OTP-based forced-change flow, so treat
+        // the admin-reset as their final password.
+        boolean hasEmail = user.getEmail() != null && !user.getEmail().isBlank();
+        user.setPasswordChanged(!hasEmail);
         userRepository.save(user);
         return tempPassword;
     }
