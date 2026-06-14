@@ -1,0 +1,29 @@
+<!--
+  Add these dependencies to your existing pom.xml.
+  Place them inside the <dependencies> block.
+  The H2 dependency already present can stay (used for local dev with default profile).
+-->
+
+<!-- PostgreSQL driver (production database) -->
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+
+<!-- Bean Validation (for @Valid on request DTOs) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-validation</artifactId>
+</dependency>
+
+<!-- Email support (for OTP and certificate delivery) -->
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+</dependency>
+
+<!--
+  NOTE: No version tags needed — Spring Boot BOM manages versions.
+  The existing pom.xml already has <parent>spring-boot-starter-parent</parent>.
+-->
