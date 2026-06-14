@@ -1,0 +1,6 @@
+com\typingtutor\service\UserServiceLoginTest.class
+com\typingtutor\security\JwtAuthFilterEmailTest.class
+com\typingtutor\service\PlacementServiceTest.class
+com\typingtutor\service\LessonServiceTest.class
+com\typingtutor\service\ExamServiceTest.class
+com\typingtutor\service\OtpServiceTest.class
