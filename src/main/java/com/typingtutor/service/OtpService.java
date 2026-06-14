@@ -8,6 +8,7 @@ import com.typingtutor.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.MessageDigest;
@@ -78,13 +79,15 @@ public class OtpService {
         });
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Optional<EmailVerification> findValidOtp(String email, String otp, String purposeStr) {
         VerificationPurpose purpose = VerificationPurpose.valueOf(purposeStr);
         List<EmailVerification> results = verificationRepository.findUnusedByEmail(email, purpose);
         if (results.isEmpty()) return Optional.empty();
         EmailVerification ev = results.get(0);
-        if (ev.getAttemptCount() >= MAX_ATTEMPTS) return Optional.empty();
+        if (ev.getAttemptCount() >= MAX_ATTEMPTS) {
+            throw new IllegalArgumentException("OTP locked. Too many incorrect attempts. Request a new code.");
+        }
         ev.setAttemptCount(ev.getAttemptCount() + 1);
         verificationRepository.save(ev);
         boolean valid = !ev.isUsed()

@@ -1,6 +1,9 @@
 -- ============================================================
--- LESSONS — seeded once per tier; includes min_wpm & min_accuracy
+-- PostgreSQL-compatible seed data (production profile)
+-- Uses string_agg() instead of H2's LISTAGG()
 -- ============================================================
+
+-- LESSONS
 INSERT INTO lessons (title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
 SELECT * FROM (VALUES
   ('Home Row Keys',       'BASIC', 'asdfjkl; asdfjkl; fdsa ;lkj asdf jkl; fjdk slaf fall lake mask desk glad half jack sale talk walk hall ball tall wall', 1, 20, 85.0),
@@ -40,23 +43,20 @@ SELECT * FROM (VALUES
 ) AS v(title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
 WHERE NOT EXISTS (SELECT 1 FROM lessons WHERE difficulty_level = 'ADVANCED');
 
--- Fix min_wpm for INTERMEDIATE and ADVANCED lessons that already existed with default value 20
+-- Fix min_wpm for existing lessons seeded with wrong default
 UPDATE lessons SET min_wpm = 35 WHERE difficulty_level = 'INTERMEDIATE' AND min_wpm = 20;
 UPDATE lessons SET min_wpm = 50 WHERE difficulty_level = 'ADVANCED'     AND min_wpm = 20 AND is_ai_generated = FALSE;
 
 -- ============================================================
 -- ADMIN USER
--- PRODUCTION DEPLOY: rotate this BCrypt hash before going live.
---   1. Generate a strong password (20+ chars, mixed case, digits, symbols).
---   2. Hash it: htpasswd -bnBC 10 "" <password> | tr -d ':\n' | sed 's/$2y/$2a/'
---      or use Spring Security's BCryptPasswordEncoder.encode() in a one-off script.
---   3. Replace the hash below and commit to your secrets store, NOT to git.
+-- IMPORTANT: Change this password before going live!
+--   1. Generate hash: use BCrypt online tool or Spring's BCryptPasswordEncoder
+--   2. Set ADMIN_PASSWORD_HASH env var OR replace hash directly
 -- ============================================================
 INSERT INTO app_users (username, user_password, role, email, email_verified, password_changed)
 SELECT 'admin', '$2b$10$N95qoF8RcUKtDcUTFh1Of.EJiFblJPz50JJ/PRg/vSplbJp4hrvBq', 'ADMIN', 'admin@typemaster.com', TRUE, TRUE
 WHERE NOT EXISTS (SELECT 1 FROM app_users WHERE username = 'admin');
 
--- Ensure existing admin always has verified email and correct role flags
 UPDATE app_users
 SET role             = 'ADMIN',
     email_verified   = TRUE,
@@ -64,25 +64,25 @@ SET role             = 'ADMIN',
 WHERE username = 'admin';
 
 -- ============================================================
--- EXAMS — one per tier, content built from lesson text
+-- EXAMS — PostgreSQL uses string_agg() instead of LISTAGG()
 -- ============================================================
 INSERT INTO exams (difficulty_level, duration_minutes, min_wpm, min_accuracy, content_text, is_active)
 SELECT 'BASIC', 15, 25, 85.0,
-    (SELECT LISTAGG(content_text, ' | ') WITHIN GROUP (ORDER BY display_order)
+    (SELECT string_agg(content_text, ' | ' ORDER BY display_order)
      FROM lessons WHERE difficulty_level = 'BASIC' AND is_ai_generated = FALSE),
     TRUE
 WHERE NOT EXISTS (SELECT 1 FROM exams WHERE difficulty_level = 'BASIC');
 
 INSERT INTO exams (difficulty_level, duration_minutes, min_wpm, min_accuracy, content_text, is_active)
 SELECT 'INTERMEDIATE', 30, 40, 87.0,
-    (SELECT LISTAGG(content_text, ' | ') WITHIN GROUP (ORDER BY display_order)
+    (SELECT string_agg(content_text, ' | ' ORDER BY display_order)
      FROM lessons WHERE difficulty_level = 'INTERMEDIATE' AND is_ai_generated = FALSE),
     TRUE
 WHERE NOT EXISTS (SELECT 1 FROM exams WHERE difficulty_level = 'INTERMEDIATE');
 
 INSERT INTO exams (difficulty_level, duration_minutes, min_wpm, min_accuracy, content_text, is_active)
 SELECT 'ADVANCED', 60, 55, 90.0,
-    (SELECT LISTAGG(content_text, ' | ') WITHIN GROUP (ORDER BY display_order)
+    (SELECT string_agg(content_text, ' | ' ORDER BY display_order)
      FROM lessons WHERE difficulty_level = 'ADVANCED' AND is_ai_generated = FALSE),
     TRUE
 WHERE NOT EXISTS (SELECT 1 FROM exams WHERE difficulty_level = 'ADVANCED');

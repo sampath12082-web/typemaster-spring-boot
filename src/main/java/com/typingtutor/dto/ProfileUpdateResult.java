@@ -1,4 +1,4 @@
-package com.typingtutor.service;
+package com.typingtutor.dto;
 
 import com.typingtutor.entity.User;
 

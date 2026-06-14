@@ -7,6 +7,7 @@ import com.typingtutor.entity.User;
 import com.typingtutor.repository.UserPerformanceRepository;
 import com.typingtutor.repository.UserRepository;
 import com.typingtutor.security.JwtUtil;
+import com.typingtutor.service.AuditLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ class UserServiceLoginTest {
     @Mock AuthenticationManager authenticationManager;
     @Mock OtpService otpService;
     @Mock EmailService emailService;
+    @Mock AuditLogService auditLogService;
 
     @InjectMocks UserService userService;
 

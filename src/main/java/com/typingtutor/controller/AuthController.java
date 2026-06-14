@@ -2,7 +2,6 @@ package com.typingtutor.controller;
 
 import com.typingtutor.dto.*;
 import com.typingtutor.entity.User;
-import com.typingtutor.service.ProfileUpdateResult;
 import com.typingtutor.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

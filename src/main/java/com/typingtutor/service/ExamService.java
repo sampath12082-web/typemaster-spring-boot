@@ -52,6 +52,10 @@ public class ExamService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
+        // Tier completion must be checked first — gives a clear "complete lessons" message
+        // before we even look up the exam
+        verifyTierComplete(user.getId(), level);
+
         Exam exam = examRepository.findByDifficultyLevelAndIsActiveTrue(level)
                 .orElseThrow(() -> new NoSuchElementException("No active exam for tier: " + tier));
 
@@ -62,11 +66,6 @@ public class ExamService {
 
         // Block if all attempts exhausted
         long totalAttempts = examAttemptRepository.countByUserAndExam(user.getId(), exam.getId());
-        if (totalAttempts >= MAX_ATTEMPTS) {
-            throw new IllegalArgumentException("You have used all " + MAX_ATTEMPTS + " attempts. Please redo the lessons to unlock the exam again.");
-        }
-
-        verifyTierComplete(user.getId(), level);
 
         ExamDto dto = new ExamDto();
         dto.setId(exam.getId());
