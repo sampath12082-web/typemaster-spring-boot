@@ -25,7 +25,7 @@ public class Lesson {
     @Column(name = "min_wpm", nullable = false, columnDefinition = "INTEGER DEFAULT 20")
     private int minWpm = 20;
 
-    @Column(name = "min_accuracy", nullable = false, columnDefinition = "DOUBLE DEFAULT 85.0")
+    @Column(name = "min_accuracy", nullable = false, columnDefinition = "DOUBLE PRECISION DEFAULT 85.0")
     private double minAccuracy = 85.0;
 
     @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")

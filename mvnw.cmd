@@ -9,4 +9,8 @@ if not exist %MAVEN_WRAPPER_JAR% (
     powershell -Command "Invoke-WebRequest -Uri %DOWNLOAD_URL% -OutFile %MAVEN_WRAPPER_JAR%"
 )
 
-java -jar %MAVEN_WRAPPER_JAR% %*
+if defined JAVA_HOME (
+    "%JAVA_HOME%\bin\java" -cp %MAVEN_WRAPPER_JAR% org.apache.maven.wrapper.MavenWrapperMain %*
+) else (
+    java -cp %MAVEN_WRAPPER_JAR% org.apache.maven.wrapper.MavenWrapperMain %*
+)
