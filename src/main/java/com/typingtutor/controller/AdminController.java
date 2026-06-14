@@ -10,6 +10,8 @@ import com.typingtutor.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,25 +36,30 @@ public class AdminController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<AdminUserDto> createUser(@Valid @RequestBody AdminCreateUserRequest req) {
-        return ResponseEntity.ok(adminService.createUser(req.getUsername(), req.getEmail(), req.getPassword()));
+    public ResponseEntity<AdminUserDto> createUser(@AuthenticationPrincipal UserDetails principal,
+                                                   @Valid @RequestBody AdminCreateUserRequest req) {
+        return ResponseEntity.ok(adminService.createUser(req.getUsername(), req.getEmail(), req.getPassword(),
+                principal.getUsername()));
     }
 
     @DeleteMapping("/users/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
-        adminService.deleteUser(userId);
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserDetails principal,
+                                           @PathVariable Long userId) {
+        adminService.deleteUser(userId, principal.getUsername());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/users/{userId}/toggle-active")
-    public ResponseEntity<Map<String, Object>> toggleActive(@PathVariable Long userId) {
-        boolean active = adminService.toggleActive(userId);
+    public ResponseEntity<Map<String, Object>> toggleActive(@AuthenticationPrincipal UserDetails principal,
+                                                            @PathVariable Long userId) {
+        boolean active = adminService.toggleActive(userId, principal.getUsername());
         return ResponseEntity.ok(Map.of("active", active));
     }
 
     @PostMapping("/users/{userId}/reset-password")
-    public ResponseEntity<Map<String, String>> resetPassword(@PathVariable Long userId) {
-        String tempPassword = adminService.resetPassword(userId);
+    public ResponseEntity<Map<String, String>> resetPassword(@AuthenticationPrincipal UserDetails principal,
+                                                             @PathVariable Long userId) {
+        String tempPassword = adminService.resetPassword(userId, principal.getUsername());
         return ResponseEntity.ok(Map.of("temporaryPassword", tempPassword));
     }
 
@@ -62,10 +69,10 @@ public class AdminController {
     }
 
     @PostMapping("/inquiries/{inquiryId}/resolve")
-    public ResponseEntity<InquiryDto> resolveInquiry(
+    public ResponseEntity<InquiryDto> resolveInquiry(@AuthenticationPrincipal UserDetails principal,
             @PathVariable Long inquiryId,
             @Valid @RequestBody ResolveInquiryRequest req) {
-        return ResponseEntity.ok(adminService.resolveInquiry(inquiryId, req.getResponse()));
+        return ResponseEntity.ok(adminService.resolveInquiry(inquiryId, req.getResponse(), principal.getUsername()));
     }
 
     @GetMapping("/audit-logs")

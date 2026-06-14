@@ -24,15 +24,18 @@ public class PerformanceService {
     private final UserRepository userRepository;
     private final LessonRepository lessonRepository;
     private final LessonService lessonService;
+    private final AuditLogService auditLogService;
 
     public PerformanceService(UserPerformanceRepository performanceRepository,
                               UserRepository userRepository,
                               LessonRepository lessonRepository,
-                              LessonService lessonService) {
+                              LessonService lessonService,
+                              AuditLogService auditLogService) {
         this.performanceRepository = performanceRepository;
         this.userRepository = userRepository;
         this.lessonRepository = lessonRepository;
         this.lessonService = lessonService;
+        this.auditLogService = auditLogService;
     }
 
     public PerformanceDto savePerformance(PerformanceRequest request, String username) {
@@ -54,6 +57,8 @@ public class PerformanceService {
                 .build();
         performance = performanceRepository.save(performance);
         log.debug("Saved performance for user={} lesson={} wpm={}", username, lesson.getId(), request.getWpm());
+        auditLogService.log(username, "LESSON_COMPLETED",
+                "lesson=" + lesson.getId() + " wpm=" + request.getWpm() + " accuracy=" + request.getAccuracyPercentage());
         return toDto(performance);
     }
 

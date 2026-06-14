@@ -24,10 +24,13 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
-    public InquiryService(InquiryRepository inquiryRepository, UserRepository userRepository) {
+    public InquiryService(InquiryRepository inquiryRepository, UserRepository userRepository,
+                          AuditLogService auditLogService) {
         this.inquiryRepository = inquiryRepository;
         this.userRepository = userRepository;
+        this.auditLogService = auditLogService;
     }
 
     public InquiryDto submitInquiry(String username, String subject, String message) {
@@ -37,7 +40,9 @@ public class InquiryService {
         inq.setUser(user);
         inq.setSubject(subject);
         inq.setMessage(message);
-        return InquiryDto.from(inquiryRepository.save(inq));
+        InquiryDto result = InquiryDto.from(inquiryRepository.save(inq));
+        auditLogService.log(username, "INQUIRY_SUBMITTED", "subject=" + subject);
+        return result;
     }
 
     public List<InquiryDto> getMyInquiries(String username) {
@@ -67,6 +72,9 @@ public class InquiryService {
         inq.setReopenReason(reason);
         inq.setLastReopenedAt(LocalDateTime.now());
         log.debug("Inquiry {} reopened by {} (reopen #{})", inquiryId, username, inq.getReopenCount());
-        return InquiryDto.from(inquiryRepository.save(inq));
+        InquiryDto result = InquiryDto.from(inquiryRepository.save(inq));
+        auditLogService.log(username, "INQUIRY_REOPENED",
+                "inquiryId=" + inquiryId + " reopenCount=" + inq.getReopenCount());
+        return result;
     }
 }

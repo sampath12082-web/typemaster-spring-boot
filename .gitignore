@@ -1,21 +1,11 @@
-# ── Sub-repos (each has its own GitHub remote) ───────
-backend/
-frontend/
+# ── Build output ──────────────────────────────────────
+target/
 
-# ── Backend ──────────────────────────────────────────
-backend/target/
-backend/data/*.mv.db
-backend/data/*.trace.db
-backend/src/main/resources/application-local.properties
-backend/src/main/resources/application-*.properties
-!backend/src/main/resources/application.properties
-!backend/src/main/resources/application-local.properties.example
+# ── Local config (contains secrets — never commit) ───
+src/main/resources/application-local.properties
 
-# ── Frontend ──────────────────────────────────────────
-frontend/node_modules/
-frontend/dist/
-frontend/playwright-report/
-frontend/test-results/
+# ── H2 database files (no longer used) ───────────────
+data/
 
 # ── OS / IDE ──────────────────────────────────────────
 .DS_Store

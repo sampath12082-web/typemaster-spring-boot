@@ -21,8 +21,11 @@ import java.util.stream.Collectors;
 public class AdminService {
 
     private static final Logger log = LoggerFactory.getLogger(AdminService.class);
-    private static final String PASSWORD_CHARS =
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+    private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
+    private static final String DIGITS = "0123456789";
+    private static final String SPECIAL = "!@#$";
+    private static final String ALL_CHARS = UPPER + LOWER + DIGITS + SPECIAL;
 
     private final UserRepository userRepository;
     private final UserPerformanceRepository performanceRepository;
@@ -76,7 +79,7 @@ public class AdminService {
     }
 
     @Transactional
-    public AdminUserDto createUser(String username, String email, String password) {
+    public AdminUserDto createUser(String username, String email, String password, String adminUsername) {
         if (userRepository.existsByUsername(username)) {
             throw new IllegalArgumentException("Username already taken: " + username);
         }
@@ -94,7 +97,7 @@ public class AdminService {
             .placementCompleted(true)   // admin-created users skip placement test
             .build();
         user = userRepository.save(user);
-        auditLogService.log("admin", "USER_CREATE", "Created user: " + username);
+        auditLogService.log(adminUsername, "USER_CREATE", "Created user: " + username);
         AdminUserDto dto = new AdminUserDto();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
@@ -104,17 +107,17 @@ public class AdminService {
     }
 
     @Transactional
-    public boolean toggleActive(Long userId) {
+    public boolean toggleActive(Long userId, String adminUsername) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         user.setActive(!user.isActive());
         userRepository.save(user);
-        auditLogService.log("admin", user.isActive() ? "USER_ACTIVATE" : "USER_DEACTIVATE", "User: " + user.getUsername());
+        auditLogService.log(adminUsername, user.isActive() ? "USER_ACTIVATE" : "USER_DEACTIVATE", "User: " + user.getUsername());
         return user.isActive();
     }
 
     @Transactional
-    public void deleteUser(Long userId) {
+    public void deleteUser(Long userId, String adminUsername) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         String username = user.getUsername();
@@ -125,10 +128,10 @@ public class AdminService {
         inquiryRepository.deleteByUserId(userId);
         emailVerificationRepository.deleteByUserId(userId);
         userRepository.deleteById(userId);
-        auditLogService.log("admin", "USER_DELETE", "Deleted user: " + username);
+        auditLogService.log(adminUsername, "USER_DELETE", "Deleted user: " + username);
     }
 
-    public String resetPassword(Long userId) {
+    public String resetPassword(Long userId, String adminUsername) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         String tempPassword = generateTemporaryPassword();
@@ -138,7 +141,7 @@ public class AdminService {
         boolean hasEmail = user.getEmail() != null && !user.getEmail().isBlank();
         user.setPasswordChanged(!hasEmail);
         userRepository.save(user);
-        auditLogService.log("admin", "PASSWORD_RESET", "Reset password for: " + user.getUsername());
+        auditLogService.log(adminUsername, "PASSWORD_RESET", "Reset password for: " + user.getUsername());
         return tempPassword;
     }
 
@@ -148,20 +151,30 @@ public class AdminService {
             .collect(Collectors.toList());
     }
 
-    public InquiryDto resolveInquiry(Long inquiryId, String response) {
+    public InquiryDto resolveInquiry(Long inquiryId, String response, String adminUsername) {
         Inquiry inq = inquiryRepository.findById(inquiryId)
             .orElseThrow(() -> new NoSuchElementException("Inquiry not found: " + inquiryId));
         inq.setStatus(InquiryStatus.RESOLVED);
         inq.setAdminResponse(response);
-        return InquiryDto.from(inquiryRepository.save(inq));
+        InquiryDto result = InquiryDto.from(inquiryRepository.save(inq));
+        auditLogService.log(adminUsername, "INQUIRY_RESOLVED", "inquiryId=" + inquiryId);
+        return result;
     }
 
     private String generateTemporaryPassword() {
         SecureRandom random = new SecureRandom();
-        StringBuilder sb = new StringBuilder(12);
-        for (int i = 0; i < 12; i++) {
-            sb.append(PASSWORD_CHARS.charAt(random.nextInt(PASSWORD_CHARS.length())));
+        // Guarantee all required categories appear, then pad to 12 chars
+        List<Character> chars = new java.util.ArrayList<>();
+        chars.add(UPPER.charAt(random.nextInt(UPPER.length())));
+        chars.add(LOWER.charAt(random.nextInt(LOWER.length())));
+        chars.add(DIGITS.charAt(random.nextInt(DIGITS.length())));
+        chars.add(SPECIAL.charAt(random.nextInt(SPECIAL.length())));
+        for (int i = 4; i < 12; i++) {
+            chars.add(ALL_CHARS.charAt(random.nextInt(ALL_CHARS.length())));
         }
+        Collections.shuffle(chars, random);
+        StringBuilder sb = new StringBuilder(12);
+        for (char c : chars) sb.append(c);
         return sb.toString();
     }
 }

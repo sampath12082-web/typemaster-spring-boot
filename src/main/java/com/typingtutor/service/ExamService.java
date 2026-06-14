@@ -30,6 +30,7 @@ public class ExamService {
     private final UserPerformanceRepository performanceRepository;
     private final CertificateRepository certificateRepository;
     private final CertificateService certificateService;
+    private final AuditLogService auditLogService;
 
     public ExamService(ExamRepository examRepository,
                        ExamAttemptRepository examAttemptRepository,
@@ -37,7 +38,8 @@ public class ExamService {
                        LessonRepository lessonRepository,
                        UserPerformanceRepository performanceRepository,
                        CertificateRepository certificateRepository,
-                       CertificateService certificateService) {
+                       CertificateService certificateService,
+                       AuditLogService auditLogService) {
         this.examRepository = examRepository;
         this.examAttemptRepository = examAttemptRepository;
         this.userRepository = userRepository;
@@ -45,6 +47,7 @@ public class ExamService {
         this.performanceRepository = performanceRepository;
         this.certificateRepository = certificateRepository;
         this.certificateService = certificateService;
+        this.auditLogService = auditLogService;
     }
 
     public ExamDto getExam(String tier, String username) {
@@ -124,10 +127,15 @@ public class ExamService {
         dto.setAttemptsUsed(attemptsUsed);
         dto.setTierReset(false);
 
+        auditLogService.log(username, "EXAM_SUBMITTED",
+                "tier=" + tier + " wpm=" + wpm + " accuracy=" + accuracy + " passed=" + passed);
+
         if (passed) {
             Certificate cert = certificateService.issueCertificate(user, attempt);
             dto.setCertificateId(cert.getCertificateId());
             dto.setAttemptsLeft(0);
+            auditLogService.log(username, "CERTIFICATE_ISSUED",
+                    "tier=" + tier + " certId=" + cert.getCertificateId());
         } else if (attemptsLeft <= 0) {
             // 3rd failure — reset tier progress so user can start over
             List<Long> tierLessonIds = lessonRepository
@@ -139,6 +147,7 @@ public class ExamService {
             dto.setAttemptsUsed(0);
             dto.setAttemptsLeft(MAX_ATTEMPTS);
             log.info("Tier reset for user={} tier={} after {} failed attempts", username, tier, MAX_ATTEMPTS);
+            auditLogService.log(username, "EXAM_TIER_RESET", "tier=" + tier);
         } else {
             dto.setAttemptsLeft(attemptsLeft);
         }

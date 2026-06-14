@@ -29,10 +29,13 @@ public class PlacementService {
 
     private final UserRepository userRepository;
     private final LessonRepository lessonRepository;
+    private final AuditLogService auditLogService;
 
-    public PlacementService(UserRepository userRepository, LessonRepository lessonRepository) {
+    public PlacementService(UserRepository userRepository, LessonRepository lessonRepository,
+                            AuditLogService auditLogService) {
         this.userRepository = userRepository;
         this.lessonRepository = lessonRepository;
+        this.auditLogService = auditLogService;
     }
 
     public Map<String, Object> getPlacementTest() {
@@ -59,6 +62,7 @@ public class PlacementService {
         userRepository.save(user);
 
         log.debug("Placement submitted for user={} wpm={} tier={}", username, wpm, tier);
+        auditLogService.log(username, "PLACEMENT_SUBMITTED", "wpm=" + wpm + " tier=" + tier);
         return new PlacementResultDto(tier, startLessonId, wpm, accuracy);
     }
 
@@ -76,6 +80,7 @@ public class PlacementService {
         userRepository.save(user);
 
         log.debug("Placement skipped for user={}", username);
+        auditLogService.log(username, "PLACEMENT_SKIPPED", "defaultTier=BASIC");
         return new PlacementResultDto("BASIC", startLessonId, 0, 0.0);
     }
 

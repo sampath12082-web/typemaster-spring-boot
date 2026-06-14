@@ -31,6 +31,7 @@ class ExamServiceTest {
     @Mock UserPerformanceRepository performanceRepository;
     @Mock CertificateRepository certificateRepository;
     @Mock CertificateService certificateService;
+    @Mock AuditLogService auditLogService;
 
     @InjectMocks ExamService examService;
 

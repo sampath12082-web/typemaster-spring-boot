@@ -204,6 +204,7 @@ public class UserService {
         user.setPasswordChanged(true);
         userRepository.save(user);
         log.debug("Password changed for user={}", username);
+        auditLogService.log(username, "PASSWORD_CHANGED", "via OTP flow");
     }
 
     @Transactional

@@ -25,6 +25,7 @@ class PlacementServiceTest {
 
     @Mock UserRepository userRepository;
     @Mock LessonRepository lessonRepository;
+    @Mock AuditLogService auditLogService;
 
     @InjectMocks PlacementService placementService;
 

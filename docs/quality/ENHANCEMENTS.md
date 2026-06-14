@@ -1,6 +1,6 @@
 # TypeMaster — Enhancement Tracker
 
-_Last updated: 2026-06-12_
+_Last updated: 2026-06-15_
 
 > **Status key:** ⏳ Pending · 🔄 In Progress · ✅ Done · 🚫 Won't Fix · ⬇️ Deferred
 
@@ -9,10 +9,10 @@ _Last updated: 2026-06-12_
 | # | Status | Area | Description | Requested | Done |
 |---|--------|------|-------------|-----------|------|
 | E-1 | ✅ Done | Typing Engine | Disable backspace — errors cannot be corrected mid-lesson; cursor stays in place, wrong chars remain red | 2026-06-12 | 2026-06-12 |
-| E-2 | ⏳ Pending | Audit Logging | Capture full user activity audit log — login/logout timestamps, lesson progress saves, profile changes, password resets, exam submissions; excludes passive browsing | 2026-06-12 | — |
-| E-3 | ⏳ Pending | Auth | Password strength standards — enforce minimum length, complexity rules on register, change-password, admin create user, and admin reset password flows | 2026-06-12 | — |
+| E-2 | ✅ Done | Audit Logging | Capture full user activity audit log — login/logout timestamps, lesson progress saves, profile changes, password resets, exam submissions; excludes passive browsing | 2026-06-12 | 2026-06-15 |
+| E-3 | 🔄 In Progress | Auth | Password strength standards — enforce minimum length, complexity rules on register, change-password, admin create user, and admin reset password flows | 2026-06-12 | — |
 | E-4 | ⏳ Pending | UX | Tooltips — add contextual tooltips throughout the application wherever a UI element benefits from a short explanation (lesson lock reasons, WPM/accuracy thresholds, exam rules, admin actions) | 2026-06-12 | — |
-| E-5 | ⏳ Pending | Placement Test | Allow users to skip the placement test — new users skip to BASIC tier lesson 1; returning users skip to continue where they left off | 2026-06-12 | — |
+| E-5 | ✅ Done | Placement Test | Allow users to skip the placement test — new users skip to BASIC tier lesson 1; returning users skip to continue where they left off | 2026-06-12 | 2026-06-15 |
 | E-6 | ⏳ Pending | Placement Test | Show logout button on the placement test page/modal so users can exit the app without completing placement | 2026-06-12 | — |
 
 ---
@@ -41,7 +41,7 @@ if (key === 'Backspace') return
 
 ---
 
-## E-2 · ⏳ Pending · User Activity Audit Log
+## E-2 · ✅ Done · User Activity Audit Log
 
 **Request:** Capture a complete audit trail of meaningful user actions. Passive browsing (page views, scrolling) is excluded.
 
@@ -67,19 +67,19 @@ if (key === 'Backspace') return
 | Admin: user toggled active | adminId, targetUserId, newState, timestamp |
 | Admin: inquiry resolved | adminId, inquiryId, timestamp |
 
-**Backend scope:**
-- New `audit_log` table: `(id, user_id, actor_id, event_type, event_data JSON, ip_address, created_at)`
-- `actor_id` = same as `user_id` for self-actions; = admin's userId for admin-on-user actions
-- New `AuditLogService` with a single `log(userId, actorId, eventType, data)` method called from existing services
-- New `AuditLogRepository` + `AuditLogController` (`GET /api/admin/audit-log` — ADMIN only, paginated)
+**Backend scope (✅ complete as of 2026-06-15):**
+- `audit_logs` table with `(id, username, action, details, created_at)` — simpler schema than original spec; `username` = actor for both self-actions and admin-on-user actions
+- `AuditLogService.log(username, action, details)` called from: `UserService` (LOGIN, EMAIL_VERIFIED, EMAIL_UPDATED, PASSWORD_CHANGED), `PerformanceService` (LESSON_COMPLETED), `PlacementService` (PLACEMENT_SUBMITTED, PLACEMENT_SKIPPED), `ExamService` (EXAM_SUBMITTED, CERTIFICATE_ISSUED, EXAM_TIER_RESET), `InquiryService` (INQUIRY_SUBMITTED, INQUIRY_REOPENED), `AdminService` (USER_CREATE, USER_DELETE, USER_ACTIVATE, USER_DEACTIVATE, PASSWORD_RESET, INQUIRY_RESOLVED)
+- Admin controller exposes `GET /api/admin/audit-logs` (returns latest 200 entries, ADMIN only)
+- Admin actions log the actual admin's username (resolved via `@AuthenticationPrincipal` in controller)
 
-**Frontend scope:**
+**Frontend scope (⏳ pending):**
 - Admin panel: new "Audit Log" tab with filterable, paginated table (filter by user, event type, date range)
-- User profile: personal activity history section (own events only, no admin events, no IP)
+- User profile: personal activity history section (own events only, no admin events)
 
 ---
 
-## E-3 · ⏳ Pending · Password Strength Standards
+## E-3 · 🔄 In Progress · Password Strength Standards
 
 **Request:** Enforce password complexity on all flows that set a password.
 
@@ -138,7 +138,7 @@ if (key === 'Backspace') return
 
 ---
 
-## E-5 · ⏳ Pending · Skip Placement Test
+## E-5 · ✅ Done · Skip Placement Test
 
 **Request:** Users should be able to skip the mandatory placement test. Skipping behaviour differs by user history:
 
@@ -147,14 +147,13 @@ if (key === 'Backspace') return
 | Brand new user (no performance records) | BASIC tier, lesson 1 (first available lesson) |
 | Returning user (has performance records) | Dashboard — resume at their last-unlocked lesson |
 
-**Backend scope:**
-- New endpoint: `POST /api/placement/skip`
-- Sets `placementCompleted = true` on the user
-- For new users: sets `recommendedTier = 'BASIC'`
-- For returning users: leaves `recommendedTier` unchanged (or sets to their current tier based on highest passed lesson)
-- Returns: `{ skipped: true, recommendedTier, startLessonId }`
+**Backend scope (✅ complete as of 2026-06-15):**
+- `POST /api/placement/skip` implemented in `PlacementController` + `PlacementService.skipPlacement()`
+- Sets `placementCompleted = true`, `recommendedTier = 'BASIC'`, `placementWpm = 0` on the user
+- Returns `PlacementResultDto` with `recommendedTier=BASIC` and `startLessonId` pointing to first BASIC lesson
+- Emits `PLACEMENT_SKIPPED` audit log entry
 
-**Frontend scope (`PlacementPage.jsx`):**
+**Frontend scope (⏳ pending):**
 - Add a "Skip placement test" link/button below the start button
 - On click: call `POST /api/placement/skip`, update AuthContext (`placementCompleted: true`), redirect to `/dashboard`
 - No confirmation needed — the skip endpoint is reversible (user can request another placement via profile settings)
