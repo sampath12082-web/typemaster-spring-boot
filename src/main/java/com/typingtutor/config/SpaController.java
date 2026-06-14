@@ -25,7 +25,8 @@ public class SpaController {
         "/help",
         "/admin",
         "/verify-email",
-        "/change-password"
+        "/change-password",
+        "/verify/**"
     })
     public String forward(HttpServletRequest request) {
         return "forward:/index.html";
