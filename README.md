@@ -134,7 +134,7 @@ Accuracy = `(correct_keystrokes / total_keystrokes) × 100`
 
 1. Switch H2 to a persistent DB (PostgreSQL/MySQL) in `application.properties`
 2. Set `spring.jpa.hibernate.ddl-auto=validate`
-3. Set a strong `app.jwt.secret` (32+ byte hex)
+3. Set a strong `JWT_SECRET` environment variable before running the backend. Do not commit real secrets into source control.
 4. Build frontend: `npm run build` → serve `dist/` via Nginx or Spring Boot static resources
 5. Package backend: `./mvnw package` → run `target/typing-tutor-backend-1.0.0.jar`
 

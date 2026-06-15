@@ -45,6 +45,20 @@ mvnw.cmd test -Dtest=ExamServiceTest#submitExam_pass      # single test method
 
 Tests use Mockito (`@ExtendWith(MockitoExtension.class)`). The Surefire plugin adds `--add-opens` flags required for Mockito inline mocking on Java 21.
 
+**Test inventory:**
+
+| File | Type | What it covers |
+|------|------|----------------|
+| `service/UserServiceLoginTest` | Unit | Login flows: no-email, unverified, first-login OTP |
+| `service/UserServiceUpdatePasswordTest` | Unit | `PUT /api/auth/me/password` service logic — correct/wrong current password, same-password guard, audit log |
+| `service/OtpServiceTest` | Unit | OTP generation, expiry, attempt locking |
+| `service/OtpServiceIntegrationTest` | Integration (`@SpringBootTest`) | OTP attempt lockout against real DB |
+| `dto/RegisterRequestValidationTest` | DTO validation | Age constraint on date-of-birth |
+| `dto/UpdatePasswordRequestValidationTest` | DTO validation | `currentPassword` blank, `newPassword` pattern (all missing-char combinations) |
+| `security/JwtAuthFilterTest` | Unit | Invalid token → 401 |
+| `security/JwtAuthFilterEmailTest` | Unit | Email verification gate |
+| `security/JwtStartupValidatorTest` | Integration | JWT secret present at startup (run by CI smoke) |
+
 ### Build
 
 ```bash
@@ -104,6 +118,15 @@ PostgreSQL everywhere — local dev and production both use it. Connection reads
 - Change-password tokens carry a `"purpose": "CHANGE_PASSWORD"` claim and expire in 15 minutes.
 - No server-side token blacklist; logout is client-side only.
 - Admin endpoints (`/api/admin/**`) require `ROLE_ADMIN` at both the filter chain and `@PreAuthorize`.
+
+**Password change flows:**
+
+| Flow | Endpoint | Auth | When used |
+|------|----------|------|-----------|
+| OTP-based (forgot / first-login) | `POST /api/auth/change-password` | Public (protected by short-lived `changePasswordToken` in body) | Forgot password, first-login forced change |
+| Authenticated change | `PUT /api/auth/me/password` | JWT required | Logged-in user voluntarily changing their password |
+
+`PUT /api/auth/me/password` body: `{ currentPassword, newPassword }`. Validates current password via BCrypt before accepting the new one; rejects if new == current. Same password regex as registration.
 
 ### Lesson progression model
 

@@ -156,7 +156,7 @@ public class UserService {
                 throw new IllegalArgumentException("ACCOUNT_INACTIVE");
             }
             log.warn("[LOGIN] Blocked — email not verified for username='{}'", request.getUsername());
-            throw new EmailNotVerifiedException("EMAIL_NOT_VERIFIED");
+            throw new EmailNotVerifiedException("EMAIL_NOT_VERIFIED", user.getEmail());
         }
 
         // First-login: force password change via OTP — skip for no-email users (can't send OTP)
@@ -205,6 +205,21 @@ public class UserService {
         userRepository.save(user);
         log.debug("Password changed for user={}", username);
         auditLogService.log(username, "PASSWORD_CHANGED", "via OTP flow");
+    }
+
+    @Transactional
+    public void updatePassword(String username, String currentPassword, String newPassword) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("User not found"));
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect.");
+        }
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            throw new IllegalArgumentException("New password must be different from your current password.");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        auditLogService.log(username, "PASSWORD_UPDATED", "Password changed by authenticated user");
     }
 
     @Transactional
@@ -310,6 +325,19 @@ public class UserService {
     }
 
     public static class EmailNotVerifiedException extends RuntimeException {
-        public EmailNotVerifiedException(String message) { super(message); }
+        private final String email;
+
+        public EmailNotVerifiedException(String message) {
+            this(message, null);
+        }
+
+        public EmailNotVerifiedException(String message, String email) {
+            super(message);
+            this.email = email;
+        }
+
+        public String getEmail() {
+            return email;
+        }
     }
 }

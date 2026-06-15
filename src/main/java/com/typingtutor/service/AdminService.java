@@ -131,7 +131,7 @@ public class AdminService {
         auditLogService.log(adminUsername, "USER_DELETE", "Deleted user: " + username);
     }
 
-    public String resetPassword(Long userId, String adminUsername) {
+    public void resetPassword(Long userId, String adminUsername) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
         String tempPassword = generateTemporaryPassword();
@@ -142,7 +142,6 @@ public class AdminService {
         user.setPasswordChanged(!hasEmail);
         userRepository.save(user);
         auditLogService.log(adminUsername, "PASSWORD_RESET", "Reset password for: " + user.getUsername());
-        return tempPassword;
     }
 
     public List<InquiryDto> getAllInquiries() {

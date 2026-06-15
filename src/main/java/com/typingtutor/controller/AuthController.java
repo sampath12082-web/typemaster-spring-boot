@@ -90,6 +90,14 @@ public class AuthController {
         return ResponseEntity.ok(userService.getRanking(userDetails.getUsername()));
     }
 
+    @PutMapping("/me/password")
+    public ResponseEntity<Map<String, String>> updatePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody UpdatePasswordRequest req) {
+        userService.updatePassword(userDetails.getUsername(), req.getCurrentPassword(), req.getNewPassword());
+        return ResponseEntity.ok(Map.of("message", "Password updated successfully."));
+    }
+
     @PutMapping("/me")
     public ResponseEntity<?> updateProfile(
             @AuthenticationPrincipal UserDetails userDetails,

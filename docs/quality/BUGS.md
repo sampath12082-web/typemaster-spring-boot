@@ -1,6 +1,6 @@
 # TypeMaster — Bug Tracker
 
-_Last updated: 2026-06-12_
+_Last updated: 2026-06-15_
 
 > **Status key:** ⏳ Open · 🔄 In Progress · ✅ Fixed · 🚫 Won't Fix · ⬇️ Deferred
 
@@ -13,6 +13,7 @@ _Last updated: 2026-06-12_
 | B-3 | ✅ Fixed | High | Auth | Legacy users with existing performance records blocked at `/placement` (DB flag `placementCompleted=false`) | 2026-06-12 | 2026-06-12 |
 | B-4 | ✅ Fixed | High | Placement | Placement test auto-submitted with WPM=0 — async call inside React `setState` updater; fired at `c<=1` not `c===0` | 2026-06-12 | 2026-06-12 |
 | B-5 | ✅ Fixed | Critical | Admin | Delete user silently failed for users with ExamAttempt/Certificate rows — FK violation → HTTP 500 → list not refreshed | 2026-06-12 | 2026-06-12 |
+| B-6 | ✅ Fixed | High | Placement | Placement test always submits WPM=0 and accuracy=0% — metrics not captured during the test session | 2026-06-15 | 2026-06-15 |
 
 ---
 
@@ -50,6 +51,15 @@ _Last updated: 2026-06-12_
 **Root cause:** `AdminService.deleteUser()` deleted only `UserPerformance` and `Inquiry` rows. Users with `ExamAttempt` or `Certificate` rows caused an FK constraint violation (`DataIntegrityViolationException` → HTTP 500). The frontend `catch` block showed "Delete failed" and never refreshed the list.  
 **Fix:** Added `deleteByUserId()` to `ExamAttemptRepository` and `CertificateRepository`. `deleteUser()` now deletes in correct FK dependency order: Certificate → ExamAttempt → Performance → Inquiry → User.  
 **Files:** `backend/.../service/AdminService.java`, `backend/.../repository/ExamAttemptRepository.java`, `backend/.../repository/CertificateRepository.java`
+
+---
+
+---
+
+### B-6 · ✅ Fixed · Placement test metrics always zero
+**Root cause:** On timer expiry, `PlacementPage` called `submitResult(0, 0)` — hardcoded zeros. `TypingEngine` tracked live WPM/accuracy internally but had no way to expose them to the parent until the user finished the full text.  
+**Fix:** Added optional `onProgress(wpm, accuracy)` prop to `TypingEngine` that fires on every WPM/accuracy update (every 300ms). `PlacementPage` stores the latest values in `liveMetricsRef` and uses them on timeout auto-submit.  
+**Files:** `frontend/src/components/TypingEngine.jsx`, `frontend/src/pages/PlacementPage.jsx`
 
 ---
 

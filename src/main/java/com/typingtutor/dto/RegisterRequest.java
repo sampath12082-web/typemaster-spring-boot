@@ -38,4 +38,9 @@ public class RegisterRequest {
     public void setCourseSpecialization(String courseSpecialization) { this.courseSpecialization = courseSpecialization; }
     public String getOccupation() { return occupation; }
     public void setOccupation(String occupation) { this.occupation = occupation; }
+
+    @AssertTrue(message = "dateOfBirth must be a real date and user must be at least 8 years old")
+    public boolean isDateOfBirthAllowed() {
+        return dateOfBirth == null || !dateOfBirth.isAfter(LocalDate.now().minusYears(8));
+    }
 }

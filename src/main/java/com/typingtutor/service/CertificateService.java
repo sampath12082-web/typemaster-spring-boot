@@ -62,22 +62,29 @@ public class CertificateService {
         return cert;
     }
 
+    @Transactional
     public List<CertificateDto> getUserCertificates(Long userId) {
         return certificateRepository.findByUserIdOrderByIssuedAtDesc(userId)
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
+    @Transactional
     public CertificateDto getCertificateByPublicId(String certificateId) {
         return certificateRepository.findByCertificateId(certificateId)
                 .map(this::toPublicDto)
                 .orElseThrow(() -> new NoSuchElementException("Certificate not found: " + certificateId));
     }
 
+    @Transactional
     public byte[] getCertificatePdf(String certificateId) {
         Certificate cert = certificateRepository.findByCertificateId(certificateId)
                 .orElseThrow(() -> new NoSuchElementException("Certificate not found: " + certificateId));
         if (cert.getPdfData() == null) {
-            throw new IllegalArgumentException("PDF not available for certificate: " + certificateId);
+            byte[] pdf = generatePdf(cert.getUser(), cert.getExamAttempt(), cert.getCertificateId());
+            cert.setPdfData(pdf);
+            certificateRepository.save(cert);
+            log.info("PDF regenerated for migrated certificate: {}", certificateId);
+            return pdf;
         }
         return cert.getPdfData();
     }

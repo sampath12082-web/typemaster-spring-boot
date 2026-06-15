@@ -156,17 +156,29 @@ public class ExamService {
     }
 
     /** Returns per-tier exam status for the authenticated user. */
+    @Transactional
     public List<ExamStatusDto> getMyExamStatuses(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
 
+        // Fetch all needed data in 3 queries to avoid N-queries-per-tier against Neon
+        List<Exam> activeExams = examRepository.findAllByIsActiveTrue();
+        List<ExamAttempt> userAttempts = examAttemptRepository.findByUserIdOrderByCompletedAtDesc(user.getId());
+        List<Object[]> certMeta = certificateRepository.findMetadataByUserIdOrderByIssuedAtDesc(user.getId());
+
         List<ExamStatusDto> statuses = new ArrayList<>();
         for (DifficultyLevel level : DifficultyLevel.values()) {
-            Exam exam = examRepository.findByDifficultyLevelAndIsActiveTrue(level).orElse(null);
+            Exam exam = activeExams.stream()
+                    .filter(e -> e.getDifficultyLevel() == level)
+                    .findFirst().orElse(null);
             if (exam == null) continue;
 
-            long passedCount = examAttemptRepository.countPassedByUserAndExam(user.getId(), exam.getId());
-            long totalAttempts = examAttemptRepository.countByUserAndExam(user.getId(), exam.getId());
+            List<ExamAttempt> tierAttempts = userAttempts.stream()
+                    .filter(a -> a.getExam().getId().equals(exam.getId()))
+                    .collect(Collectors.toList());
+
+            long passedCount = tierAttempts.stream().filter(ExamAttempt::isPassed).count();
+            long totalAttempts = tierAttempts.size();
 
             ExamStatusDto dto = new ExamStatusDto();
             dto.setTier(level.name());
@@ -174,15 +186,15 @@ public class ExamService {
             dto.setAttemptCount((int) totalAttempts);
             dto.setRemainingAttempts(passedCount > 0 ? 0 : (int) Math.max(0, MAX_ATTEMPTS - totalAttempts));
 
-            // Attach certificate info if passed
-            certificateRepository.findByUserIdOrderByIssuedAtDesc(user.getId()).stream()
-                    .filter(c -> c.getDifficultyLevel() == level)
+            // Attach certificate info — uses pre-fetched metadata (no pdf_data LOB loaded)
+            certMeta.stream()
+                    .filter(row -> row[2] == level)
                     .findFirst()
-                    .ifPresent(c -> {
-                        dto.setCertificateId(c.getCertificateId());
-                        dto.setIssuedAt(c.getIssuedAt().toString());
-                        // Best passing attempt stats
-                        examAttemptRepository.findPassedByUserAndExam(user.getId(), exam.getId()).stream()
+                    .ifPresent(row -> {
+                        dto.setCertificateId((String) row[0]);
+                        dto.setIssuedAt(((LocalDateTime) row[1]).toString());
+                        tierAttempts.stream()
+                                .filter(ExamAttempt::isPassed)
                                 .max(Comparator.comparingInt(ExamAttempt::getWpm))
                                 .ifPresent(a -> {
                                     dto.setWpm(a.getWpm());

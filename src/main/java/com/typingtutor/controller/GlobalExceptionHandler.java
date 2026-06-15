@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -32,7 +33,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EmailNotVerifiedException.class)
     public ResponseEntity<Map<String, String>> handleEmailNotVerified(EmailNotVerifiedException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", e.getMessage()));
+        Map<String, String> body = new LinkedHashMap<>();
+        body.put("error", e.getMessage());
+        if (e.getEmail() != null && !e.getEmail().isBlank()) {
+            body.put("email", e.getEmail());
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

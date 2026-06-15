@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -105,9 +106,12 @@ class UserServiceLoginTest {
         User user = activeUser("user@example.com", false, true); // emailVerified=false
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
 
-        assertThatThrownBy(() -> userService.login(loginRequest))
-                .isInstanceOf(UserService.EmailNotVerifiedException.class)
-                .hasMessage("EMAIL_NOT_VERIFIED");
+        UserService.EmailNotVerifiedException ex = catchThrowableOfType(
+                () -> userService.login(loginRequest),
+                UserService.EmailNotVerifiedException.class);
+
+        assertThat(ex).hasMessage("EMAIL_NOT_VERIFIED");
+        assertThat(ex.getEmail()).isEqualTo("user@example.com");
     }
 
     // ── Email + verified must be allowed ──────────────────────────────────────
