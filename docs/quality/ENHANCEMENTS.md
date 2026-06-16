@@ -1,6 +1,6 @@
 # TypeMaster — Enhancement Tracker
 
-_Last updated: 2026-06-15_
+_Last updated: 2026-06-16_
 
 > **Status key:** ⏳ Pending · 🔄 In Progress · ✅ Done · 🚫 Won't Fix · ⬇️ Deferred
 
@@ -14,6 +14,7 @@ _Last updated: 2026-06-15_
 | E-4 | ⏳ Pending | UX | Tooltips — add contextual tooltips throughout the application wherever a UI element benefits from a short explanation (lesson lock reasons, WPM/accuracy thresholds, exam rules, admin actions) | 2026-06-12 | — |
 | E-5 | ✅ Done | Placement Test | Allow users to skip the placement test — new users skip to BASIC tier lesson 1; returning users skip to continue where they left off | 2026-06-12 | 2026-06-15 |
 | E-6 | ⏳ Pending | Placement Test | Show logout button on the placement test page/modal so users can exit the app without completing placement | 2026-06-12 | — |
+| E-7 | ✅ Done | Security | Encrypt passwords client-side before they leave the browser — request payloads (login, register, change-password, admin create-user) were showing plaintext passwords in DevTools → Network. RSA-OAEP, defense-in-depth on top of TLS. | 2026-06-16 | 2026-06-16 |
 
 ---
 
@@ -170,6 +171,39 @@ if (key === 'Backspace') return
 - On click: call `AuthContext.logout()` which clears `tt_token` and `tt_user` from localStorage and redirects to `/login`
 - Button should be styled consistently with the existing Navbar logout button (same icon + text or icon-only with tooltip "Logout")
 - No confirmation dialog needed — user data is preserved; they can resume or skip placement on next login
+
+---
+
+## E-7 · ✅ Done · Encrypt Password Payloads in Transit
+
+**Request:** DevTools → Network → Request showed plaintext username/password in the login, register,
+change-password and admin-create-user request bodies. Encrypt the password before it leaves the
+browser so it's never visible in plaintext, even to someone inspecting the request on the user's
+own machine (browser extension, screen/network capture, shared support session).
+
+**Note on threat model:** TLS already protects the wire; this is defense-in-depth, not a fix for a
+remotely exploitable vulnerability — a password-based login always requires the server to receive
+the real password to authenticate it.
+
+**Backend scope (✅ complete):**
+- `PasswordCryptoService` (`security/`) generates a fresh RSA-2048 keypair in memory on every
+  startup and exposes `decrypt(base64Ciphertext)` (RSA-OAEP/SHA-256).
+- `GET /api/auth/public-key` (public, no auth) returns the current public key as Base64 SPKI.
+- `AuthController` decrypts `LoginRequest.password`, `RegisterRequest.password`,
+  `ChangePasswordRequest.newPassword`, and both fields of `UpdatePasswordRequest` before handing
+  plaintext to the unchanged `UserService` methods. `AdminController.createUser` does the same for
+  `AdminCreateUserRequest.password`.
+- Password complexity (`PasswordPolicy`, extracted from the old DTO `@Pattern` regex) is now
+  checked against the decrypted plaintext in the controller, since the wire value is ciphertext
+  and can no longer be validated by a DTO-level `@Pattern`.
+
+**Frontend scope (✅ complete):**
+- `src/services/crypto.js` — `encryptPassword(plaintext)` fetches the current public key fresh on
+  every call (so a backend restart, which rotates the keypair, never leaves a tab encrypting
+  against a stale key) and encrypts via the native Web Crypto `RSA-OAEP` API.
+- Wired into `AuthContext` (`login`, `register`), `ChangePasswordPage`, `ProfilePage` (change-
+  password card), and `AdminPage` (create-user form) — all four password-carrying submissions now
+  send ciphertext instead of plaintext.
 
 ---
 

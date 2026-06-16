@@ -6,6 +6,8 @@ import com.typingtutor.dto.InquiryDto;
 import com.typingtutor.dto.ResolveInquiryRequest;
 import com.typingtutor.entity.AuditLog;
 import com.typingtutor.repository.AuditLogRepository;
+import com.typingtutor.security.PasswordCryptoService;
+import com.typingtutor.security.PasswordPolicy;
 import com.typingtutor.service.AdminService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +26,13 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AuditLogRepository auditLogRepository;
+    private final PasswordCryptoService passwordCryptoService;
 
-    public AdminController(AdminService adminService, AuditLogRepository auditLogRepository) {
+    public AdminController(AdminService adminService, AuditLogRepository auditLogRepository,
+                           PasswordCryptoService passwordCryptoService) {
         this.adminService = adminService;
         this.auditLogRepository = auditLogRepository;
+        this.passwordCryptoService = passwordCryptoService;
     }
 
     @GetMapping("/users")
@@ -38,7 +43,9 @@ public class AdminController {
     @PostMapping("/users")
     public ResponseEntity<AdminUserDto> createUser(@AuthenticationPrincipal UserDetails principal,
                                                    @Valid @RequestBody AdminCreateUserRequest req) {
-        return ResponseEntity.ok(adminService.createUser(req.getUsername(), req.getEmail(), req.getPassword(),
+        String plainPassword = passwordCryptoService.decrypt(req.getPassword());
+        PasswordPolicy.validate(plainPassword);
+        return ResponseEntity.ok(adminService.createUser(req.getUsername(), req.getEmail(), plainPassword,
                 principal.getUsername()));
     }
 
