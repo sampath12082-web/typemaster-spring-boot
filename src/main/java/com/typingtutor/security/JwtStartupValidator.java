@@ -23,18 +23,19 @@ public class JwtStartupValidator {
             log.error(msg);
             throw new IllegalStateException(msg);
         }
+        byte[] keyBytes;
         try {
-            byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-            if (keyBytes.length < 32) {
-                String msg = "app.jwt.secret decodes to fewer than 32 bytes — use a sufficiently long base64-encoded secret.";
-                log.error(msg);
-                throw new IllegalStateException(msg);
-            }
-            log.info("app.jwt.secret validated: {} bytes", keyBytes.length);
+            keyBytes = Decoders.BASE64.decode(jwtSecret);
         } catch (Exception e) {
             String msg = "Failed to decode app.jwt.secret as base64: " + e.getMessage();
             log.error(msg, e);
             throw new IllegalStateException(msg, e);
         }
+        if (keyBytes.length < 32) {
+            String msg = "app.jwt.secret decodes to fewer than 32 bytes — use a sufficiently long base64-encoded secret.";
+            log.error(msg);
+            throw new IllegalStateException(msg);
+        }
+        log.info("app.jwt.secret validated: {} bytes", keyBytes.length);
     }
 }
