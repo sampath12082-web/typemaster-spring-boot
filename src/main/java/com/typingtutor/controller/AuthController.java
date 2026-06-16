@@ -2,6 +2,8 @@ package com.typingtutor.controller;
 
 import com.typingtutor.dto.*;
 import com.typingtutor.entity.User;
+import com.typingtutor.security.PasswordCryptoService;
+import com.typingtutor.security.PasswordPolicy;
 import com.typingtutor.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +19,30 @@ import java.util.Map;
 public class AuthController {
 
     private final UserService userService;
+    private final PasswordCryptoService passwordCryptoService;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, PasswordCryptoService passwordCryptoService) {
         this.userService = userService;
+        this.passwordCryptoService = passwordCryptoService;
+    }
+
+    /** Public key the frontend encrypts passwords with before they ever leave the browser. */
+    @GetMapping("/public-key")
+    public ResponseEntity<Map<String, String>> publicKey() {
+        return ResponseEntity.ok(Map.of("publicKey", passwordCryptoService.getPublicKeyBase64()));
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest req) {
+        String plainPassword = passwordCryptoService.decrypt(req.getPassword());
+        PasswordPolicy.validate(plainPassword);
+        req.setPassword(plainPassword);
         return ResponseEntity.ok(userService.register(req));
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
+        req.setPassword(passwordCryptoService.decrypt(req.getPassword()));
         return ResponseEntity.ok(userService.login(req));
     }
 
@@ -51,7 +65,9 @@ public class AuthController {
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, String>> changePassword(
             @Valid @RequestBody ChangePasswordRequest req) {
-        userService.changePassword(req.getChangePasswordToken(), req.getNewPassword());
+        String plainPassword = passwordCryptoService.decrypt(req.getNewPassword());
+        PasswordPolicy.validate(plainPassword);
+        userService.changePassword(req.getChangePasswordToken(), plainPassword);
         return ResponseEntity.ok(Map.of("message", "Password changed successfully."));
     }
 
@@ -94,7 +110,10 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> updatePassword(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody UpdatePasswordRequest req) {
-        userService.updatePassword(userDetails.getUsername(), req.getCurrentPassword(), req.getNewPassword());
+        String currentPassword = passwordCryptoService.decrypt(req.getCurrentPassword());
+        String newPassword = passwordCryptoService.decrypt(req.getNewPassword());
+        PasswordPolicy.validate(newPassword);
+        userService.updatePassword(userDetails.getUsername(), currentPassword, newPassword);
         return ResponseEntity.ok(Map.of("message", "Password updated successfully."));
     }
 

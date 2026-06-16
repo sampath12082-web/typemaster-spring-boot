@@ -55,51 +55,16 @@ class UpdatePasswordRequestValidationTest {
     }
 
     @Test
-    void newPassword_missingUppercase_failsValidation() {
+    void nullNewPassword_failsValidation() {
         UpdatePasswordRequest req = validRequest();
-        req.setNewPassword("nouppercase@1234");
+        req.setNewPassword(null);
         assertThat(validator.validate(req))
                 .anyMatch(v -> v.getPropertyPath().toString().equals("newPassword"));
     }
 
-    @Test
-    void newPassword_missingLowercase_failsValidation() {
-        UpdatePasswordRequest req = validRequest();
-        req.setNewPassword("NOLOWERCASE@1234");
-        assertThat(validator.validate(req))
-                .anyMatch(v -> v.getPropertyPath().toString().equals("newPassword"));
-    }
-
-    @Test
-    void newPassword_missingDigit_failsValidation() {
-        UpdatePasswordRequest req = validRequest();
-        req.setNewPassword("NoDigitsPass@");
-        assertThat(validator.validate(req))
-                .anyMatch(v -> v.getPropertyPath().toString().equals("newPassword"));
-    }
-
-    @Test
-    void newPassword_missingSpecialChar_failsValidation() {
-        UpdatePasswordRequest req = validRequest();
-        req.setNewPassword("NoSpecial1234A");
-        assertThat(validator.validate(req))
-                .anyMatch(v -> v.getPropertyPath().toString().equals("newPassword"));
-    }
-
-    @Test
-    void newPassword_tooShort_failsValidation() {
-        UpdatePasswordRequest req = validRequest();
-        req.setNewPassword("Sh@1");
-        assertThat(validator.validate(req))
-                .anyMatch(v -> v.getPropertyPath().toString().equals("newPassword"));
-    }
-
-    @Test
-    void newPassword_exactlyEightChars_passesValidation() {
-        UpdatePasswordRequest req = validRequest();
-        req.setNewPassword("Abcd@123");
-        assertThat(validator.validate(req)).isEmpty();
-    }
+    // Password complexity rules (uppercase/lowercase/digit/special/length) no longer apply at the
+    // DTO level — this field carries RSA-OAEP ciphertext over the wire. That rule is checked
+    // against the decrypted plaintext in AuthController via PasswordPolicy; see PasswordPolicyTest.
 
     private UpdatePasswordRequest validRequest() {
         UpdatePasswordRequest req = new UpdatePasswordRequest();

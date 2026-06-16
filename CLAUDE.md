@@ -58,6 +58,9 @@ Tests use Mockito (`@ExtendWith(MockitoExtension.class)`). The Surefire plugin a
 | `security/JwtAuthFilterTest` | Unit | Invalid token → 401 |
 | `security/JwtAuthFilterEmailTest` | Unit | Email verification gate |
 | `security/JwtStartupValidatorTest` | Integration | JWT secret present at startup (run by CI smoke) |
+| `service/ExamServiceTest` | Unit | Tier-not-complete guard, pass → certificate issuance, fail → no certificate, invalid tier |
+| `service/LessonServiceTest` | Unit | Per-user lesson unlock/pass/fail status computation |
+| `service/PlacementServiceTest` | Unit | WPM → tier thresholds (`<20` Basic, `20-39` Intermediate, `≥40` Advanced), passage/time-limit retrieval |
 
 ### Build
 
@@ -146,7 +149,12 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 - **`CertificateService`** — generates PDF via PDFBox, stores binary in `certificates.pdf_data`
 - **`OtpService`** — creates 6-digit OTPs with a 15-minute expiry; purpose enum: `VERIFY_EMAIL | FIRST_LOGIN | RESET_PASSWORD`
 - **`LessonGenerationService`** — calls Anthropic API (Claude) if `AI_API_KEY` is set; silently disabled otherwise
+- **`HelpAgentService`** — separate Anthropic-backed support chatbot; calls `https://api.anthropic.com/v1/messages` directly via `java.net.http.HttpClient` with a fixed product-knowledge system prompt, returns `{ answer, escalate }`
 - **`AuditLogService`** — logs admin actions to `audit_log` table
+- **`PlacementService`** — serves the placement passage/time limit and maps WPM to starting tier (`< 20 BASIC`, `20-39 INTERMEDIATE`, `≥ 40 ADVANCED`)
+- **`AdminService`** — admin user CRUD/reset-password; deletes a user's `inquiries`/`certificates`/etc. in FK-safe order (see cascade order above)
+- **`InquiryService`** — support inquiry lifecycle (create, resolve, reopen) backing `InquiryController`
+- **`EmailService`** — sends verification/OTP/notification emails via `spring-boot-starter-mail`
 
 ### Environment variables
 
@@ -157,6 +165,10 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 | `AI_API_KEY` | No | Anthropic API key for AI lesson generation |
 | `CORS_ALLOWED_ORIGIN_PATTERNS` | No | Overrides default `http://localhost:*` |
 
+### Deployment
+
+`.github/workflows/deploy.yml` runs on every push to `main`: builds with `mvn package -DskipTests -B`, then POSTs to `${{ secrets.RENDER_DEPLOY_HOOK_URL }}` to trigger a Render deploy — there is no test gate before deploy. `Dockerfile` is a two-stage build (`maven:3.9.6-eclipse-temurin-21` → `eclipse-temurin:21-jre-alpine`), exposes port 8080.
+
 ## Important conventions
 
 - Controllers are thin — no business logic, just parameter extraction and service delegation.
@@ -164,3 +176,10 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 - Placement test thresholds: `< 20 WPM → BASIC`, `20–39 → INTERMEDIATE`, `≥ 40 → ADVANCED`.
 - WPM formula: `(charsTyped / 5) / elapsedMinutes`. Accuracy: `(correctKeys / totalKeys) * 100`.
 - The H2 console is gated by `spring.h2.console.enabled`; frame-options are only disabled when that flag is true.
+
+## Further reading
+
+- `docs/architecture/HLD.md` / `LLD.md` — high/low-level design
+- `docs/quality/SECURITY_AUDIT.md` — tracked findings; check status before assuming a listed issue is still open, some predate recent commits
+- `docs/quality/TEST_PLAN.md`, `TESTING.md`, `BUGS.md`, `CODE_REVIEW.md`, `ENHANCEMENTS.md` — test strategy, known bugs, review notes
+- `docs/standards/CODING_STANDARDS.md` — naming, layering, transaction, and logging conventions for both backend and frontend

@@ -40,7 +40,7 @@ This file helps AI coding agents work productively in the TypeMaster backend rep
 ## Important docs
 - `README.md` — repo overview and quick start.
 - `CLAUDE.md` — backend architecture, commands, and security audit notes.
-- `docs/security/SECURITY_AUDIT.md` — active security findings and recommended fixes.
+- `docs/quality/SECURITY_AUDIT.md` — active security findings and recommended fixes.
 
 ## Special notes for agents
 - Prefer using the bundled Maven wrapper rather than a system Maven install.

@@ -6,10 +6,9 @@ import java.time.LocalDate;
 public class RegisterRequest {
     @NotBlank @Size(min = 3, max = 50) private String username;
     @NotBlank @Email private String email;
-    @NotBlank @Pattern(
-        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,100}$",
-        message = "Password must be 8-100 characters with uppercase, lowercase, digit and special character (@$!%*?&)"
-    ) private String password;
+    // RSA-OAEP encrypted (Base64) by the client — decrypted and complexity-checked in
+    // AuthController before reaching the service layer; see PasswordCryptoService/PasswordPolicy.
+    @NotBlank private String password;
     @NotBlank private String fullName;
     @NotNull private LocalDate dateOfBirth;
     private boolean student;

@@ -1,18 +1,15 @@
 package com.typingtutor.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 
 public class UpdatePasswordRequest {
 
+    // Both fields are RSA-OAEP encrypted (Base64) by the client — decrypted and
+    // complexity-checked in AuthController; see PasswordCryptoService/PasswordPolicy.
     @NotBlank
     private String currentPassword;
 
     @NotBlank
-    @Pattern(
-        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,100}$",
-        message = "Password must be 8-100 characters with uppercase, lowercase, digit and special character (@$!%*?&)"
-    )
     private String newPassword;
 
     public String getCurrentPassword() { return currentPassword; }

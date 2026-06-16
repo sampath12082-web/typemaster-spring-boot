@@ -47,6 +47,7 @@ public class SecurityConfig {
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> {
                 auth.requestMatchers(
+                    "/api/auth/public-key",
                     "/api/auth/login",
                     "/api/auth/register",
                     "/api/auth/verify-email",
