@@ -6,12 +6,14 @@ import com.typingtutor.entity.*;
 import com.typingtutor.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -24,8 +26,11 @@ public class AdminService {
     private static final String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     private static final String LOWER = "abcdefghijklmnopqrstuvwxyz";
     private static final String DIGITS = "0123456789";
-    private static final String SPECIAL = "!@#$";
+    private static final String SPECIAL = "@$!%*?&";
     private static final String ALL_CHARS = UPPER + LOWER + DIGITS + SPECIAL;
+
+    @Value("${app.dev-otp-enabled:false}")
+    private boolean devOtpEnabled;
 
     private final UserRepository userRepository;
     private final UserPerformanceRepository performanceRepository;
@@ -35,6 +40,8 @@ public class AdminService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuditLogService auditLogService;
+    private final OtpService otpService;
+    private final EmailService emailService;
 
     public AdminService(UserRepository userRepository,
                         UserPerformanceRepository performanceRepository,
@@ -43,7 +50,9 @@ public class AdminService {
                         CertificateRepository certificateRepository,
                         EmailVerificationRepository emailVerificationRepository,
                         PasswordEncoder passwordEncoder,
-                        AuditLogService auditLogService) {
+                        AuditLogService auditLogService,
+                        OtpService otpService,
+                        EmailService emailService) {
         this.userRepository = userRepository;
         this.performanceRepository = performanceRepository;
         this.inquiryRepository = inquiryRepository;
@@ -52,6 +61,8 @@ public class AdminService {
         this.emailVerificationRepository = emailVerificationRepository;
         this.passwordEncoder = passwordEncoder;
         this.auditLogService = auditLogService;
+        this.otpService = otpService;
+        this.emailService = emailService;
     }
 
     public List<AdminUserDto> getAllUsers() {
@@ -131,17 +142,38 @@ public class AdminService {
         auditLogService.log(adminUsername, "USER_DELETE", "Deleted user: " + username);
     }
 
-    public void resetPassword(Long userId, String adminUsername) {
+    @Transactional
+    public Map<String, Object> resetPassword(Long userId, String adminUsername) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NoSuchElementException("User not found: " + userId));
-        String tempPassword = generateTemporaryPassword();
-        user.setPassword(passwordEncoder.encode(tempPassword));
-        // No-email users can't complete the OTP-based forced-change flow, so treat
-        // the admin-reset as their final password.
+        Map<String, Object> result = new HashMap<>();
         boolean hasEmail = user.getEmail() != null && !user.getEmail().isBlank();
-        user.setPasswordChanged(!hasEmail);
-        userRepository.save(user);
-        auditLogService.log(adminUsername, "PASSWORD_RESET", "Reset password for: " + user.getUsername());
+
+        if (hasEmail) {
+            // Send OTP to user's email so they can set their own new password
+            EmailVerification ev = otpService.createOtp(user.getId(), "RESET_PASSWORD");
+            String displayName = (user.getFullName() != null && !user.getFullName().isBlank())
+                    ? user.getFullName() : user.getUsername();
+            boolean emailSent = emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "RESET_PASSWORD", displayName);
+            if (devOtpEnabled) {
+                result.put("devOtp", ev.getOtpCode());
+            } else if (!emailSent) {
+                result.put("emailWarning", "OTP email could not be sent. Check MAIL_PASSWORD configuration.");
+            }
+            result.put("otpSent", true);
+            result.put("message", "Password reset OTP sent to user's email address.");
+            auditLogService.log(adminUsername, "PASSWORD_RESET_OTP", "Sent reset OTP to: " + user.getEmail());
+        } else {
+            // No email — generate a temporary password the admin can share directly
+            String tempPassword = generateTemporaryPassword();
+            user.setPassword(passwordEncoder.encode(tempPassword));
+            user.setPasswordChanged(true);  // no forced change; admin provides temp directly
+            userRepository.save(user);
+            result.put("temporaryPassword", tempPassword);
+            result.put("message", "Temporary password set. Share it through a secure channel.");
+            auditLogService.log(adminUsername, "PASSWORD_RESET", "Temp password set for: " + user.getUsername());
+        }
+        return result;
     }
 
     public List<InquiryDto> getAllInquiries() {
@@ -162,17 +194,17 @@ public class AdminService {
 
     private String generateTemporaryPassword() {
         SecureRandom random = new SecureRandom();
-        // Guarantee all required categories appear, then pad to 12 chars
+        // Guarantee all required categories appear, then pad to 16 chars (matches password policy)
         List<Character> chars = new java.util.ArrayList<>();
         chars.add(UPPER.charAt(random.nextInt(UPPER.length())));
         chars.add(LOWER.charAt(random.nextInt(LOWER.length())));
         chars.add(DIGITS.charAt(random.nextInt(DIGITS.length())));
         chars.add(SPECIAL.charAt(random.nextInt(SPECIAL.length())));
-        for (int i = 4; i < 12; i++) {
+        for (int i = 4; i < 16; i++) {
             chars.add(ALL_CHARS.charAt(random.nextInt(ALL_CHARS.length())));
         }
         Collections.shuffle(chars, random);
-        StringBuilder sb = new StringBuilder(12);
+        StringBuilder sb = new StringBuilder(16);
         for (char c : chars) sb.append(c);
         return sb.toString();
     }
