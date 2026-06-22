@@ -64,10 +64,9 @@ public class AdminController {
     }
 
     @PostMapping("/users/{userId}/reset-password")
-    public ResponseEntity<Map<String, String>> resetPassword(@AuthenticationPrincipal UserDetails principal,
+    public ResponseEntity<Map<String, Object>> resetPassword(@AuthenticationPrincipal UserDetails principal,
                                                              @PathVariable Long userId) {
-        adminService.resetPassword(userId, principal.getUsername());
-        return ResponseEntity.ok(Map.of("message", "Password reset successfully. Share it through a secure channel."));
+        return ResponseEntity.ok(adminService.resetPassword(userId, principal.getUsername()));
     }
 
     @GetMapping("/inquiries")

@@ -1,6 +1,6 @@
 # TypeMaster — Bug Tracker
 
-_Last updated: 2026-06-15_
+_Last updated: 2026-06-17_
 
 > **Status key:** ⏳ Open · 🔄 In Progress · ✅ Fixed · 🚫 Won't Fix · ⬇️ Deferred
 
@@ -14,6 +14,8 @@ _Last updated: 2026-06-15_
 | B-4 | ✅ Fixed | High | Placement | Placement test auto-submitted with WPM=0 — async call inside React `setState` updater; fired at `c<=1` not `c===0` | 2026-06-12 | 2026-06-12 |
 | B-5 | ✅ Fixed | Critical | Admin | Delete user silently failed for users with ExamAttempt/Certificate rows — FK violation → HTTP 500 → list not refreshed | 2026-06-12 | 2026-06-12 |
 | B-6 | ✅ Fixed | High | Placement | Placement test always submits WPM=0 and accuracy=0% — metrics not captured during the test session | 2026-06-15 | 2026-06-15 |
+| B-7 | ✅ Fixed | High | Email/OTP | Send-OTP email not working — root-caused and permanently fixed (devOtp decoupled, boolean return, Gmail SMTP, emailWarning surfaced) | 2026-06-16 | 2026-06-17 |
+| B-8 | ⬇️ Deferred | Testing | Email/OTP | No E2E test coverage for the send-OTP-email flow — blocked until a test mailbox API (Mailtrap/Mailosaur) is available | 2026-06-16 | — |
 
 ---
 
@@ -60,6 +62,31 @@ _Last updated: 2026-06-15_
 **Root cause:** On timer expiry, `PlacementPage` called `submitResult(0, 0)` — hardcoded zeros. `TypingEngine` tracked live WPM/accuracy internally but had no way to expose them to the parent until the user finished the full text.  
 **Fix:** Added optional `onProgress(wpm, accuracy)` prop to `TypingEngine` that fires on every WPM/accuracy update (every 300ms). `PlacementPage` stores the latest values in `liveMetricsRef` and uses them on timeout auto-submit.  
 **Files:** `frontend/src/components/TypingEngine.jsx`, `frontend/src/pages/PlacementPage.jsx`
+
+---
+
+### B-7 · ✅ Fixed · Send-OTP email — permanent fix implemented
+**Root cause (multi-factor):**
+1. `app.dev-otp-enabled` was not a separate property — it was computed from whether mail was configured. If SMTP credentials were missing in any environment, `devOtp` was returned silently in the API response, leaking OTP codes in non-local environments.
+2. `EmailService.send()` swallowed all exceptions without surfacing them to the caller — callers had no way to know sends were failing.
+3. Gmail SMTP was inconsistently referenced; some deploy scripts still pointed to Brevo.
+
+**Fix:**
+- New `app.dev-otp-enabled` property: `false` in `application.properties` and `application-prod.properties`; `true` only in `application-local.properties`. devOtp is now environment-gated, not mail-configured-gated.
+- `EmailService.sendOtp()` and `send()` now return `boolean` — `true` = sent, `false` = disabled or failed (with WARN/ERROR log). All callers surface an `emailWarning` field to the API response on failure instead of silently lying.
+- Gmail SMTP (smtp.gmail.com:587, `yourtypemaster@gmail.com`) standardized across `application.properties` and all deploy scripts. Uses Gmail App Password (`MAIL_PASSWORD` env var).
+- Frontend `VerifyEmailPage` and `LoginPage` display a red warning banner when `emailWarning` is present, so users know to retry.
+
+**Remaining last mile:** Set `MAIL_PASSWORD=<Gmail App Password>` env var in production (Render dashboard). Code change is complete; without this env var the fix sends correctly in local with App Password but silently skips in production.
+
+**Files:** `EmailService.java`, `UserService.java`, `ProfileUpdateResult.java`, `AuthController.java`, `VerifyEmailPage.jsx`, `LoginPage.jsx`, `RegisterPage.jsx`, `ProfilePage.jsx`, `application*.properties`, `deployment/`
+
+---
+
+### B-8 · ⏳ Open · No real E2E test coverage for send-OTP-email
+**Reported:** Existing E2E tests (`10-otp.spec.js` etc.) only exercise the `devOtp` shortcut returned in the API response when `EmailService.isMailEnabled()` is false — they never verify a real email actually gets sent and received.
+**Needed:** Frontend-to-email **end-to-end** test coverage, not backend-only: trigger the OTP flow through the real UI (register / resend / forgot-password), and verify an actual email was sent and is usable — e.g. via a test mailbox/inbox API (Mailtrap, Mailosaur, or similar), or at minimum asserting against the mail server logs/send confirmation rather than the `devOtp` bypass. Should run as part of the regular Playwright suite, tagged so it can be skipped in environments without a test-mailbox provider configured.
+**Depends on:** B-7 being fixed first (no point writing E2E coverage for a flow that's currently broken).
 
 ---
 

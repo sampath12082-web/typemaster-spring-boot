@@ -138,6 +138,7 @@ public class AuthController {
                 ? user.getEmailVerificationDeadline().toString() : null);
         resp.put("emailChanged",       result.emailChanged());
         if (result.devOtp() != null) resp.put("devOtp", result.devOtp());
+        if (result.emailWarning() != null) resp.put("emailWarning", result.emailWarning());
         resp.put("message",            "Profile updated successfully.");
         return ResponseEntity.ok(resp);
     }

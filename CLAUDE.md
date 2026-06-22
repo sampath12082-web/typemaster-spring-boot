@@ -61,6 +61,9 @@ Tests use Mockito (`@ExtendWith(MockitoExtension.class)`). The Surefire plugin a
 | `service/ExamServiceTest` | Unit | Tier-not-complete guard, pass → certificate issuance, fail → no certificate, invalid tier |
 | `service/LessonServiceTest` | Unit | Per-user lesson unlock/pass/fail status computation |
 | `service/PlacementServiceTest` | Unit | WPM → tier thresholds (`<20` Basic, `20-39` Intermediate, `≥40` Advanced), passage/time-limit retrieval |
+| `service/EmailServiceTest` | Unit | Email sending logic |
+| `security/PasswordCryptoServiceTest` | Unit | RSA-OAEP encrypt/decrypt round-trip, public key export |
+| `security/PasswordPolicyTest` | Unit | Password complexity regex — all missing-char combinations |
 
 ### Build
 
@@ -84,7 +87,7 @@ scripts/stop-all.bat        # kills both processes
 |---------|---------|
 | `controller/` | REST controllers — thin, delegate all logic to services |
 | `service/` | Business logic (auth, lessons, placement, exams, certificates, AI gen) |
-| `entity/` | JPA entities mapping to H2/PostgreSQL tables |
+| `entity/` | JPA entities mapping to PostgreSQL tables |
 | `repository/` | Spring Data JPA interfaces |
 | `dto/` | Request/response shapes; never expose entities directly |
 | `security/` | JWT filter, `UserPrincipal`, `UserDetailsServiceImpl` |
@@ -121,6 +124,14 @@ PostgreSQL everywhere — local dev and production both use it. Connection reads
 - Change-password tokens carry a `"purpose": "CHANGE_PASSWORD"` claim and expire in 15 minutes.
 - No server-side token blacklist; logout is client-side only.
 - Admin endpoints (`/api/admin/**`) require `ROLE_ADMIN` at both the filter chain and `@PreAuthorize`.
+
+### Password transport encryption
+
+`PasswordCryptoService` encrypts login/password-change payloads with RSA-OAEP (SHA-256) so passwords never travel as plaintext in the request body (defense-in-depth on top of TLS). The RSA keypair is generated fresh on each server start and kept in-memory only. The frontend fetches the public key via `GET /api/auth/public-key` immediately before every encrypt call, so a restart never leaves clients holding a stale key. Password fields in DTOs now carry RSA ciphertext — `PasswordPolicy` validates the decrypted plaintext server-side.
+
+### Password policy
+
+`PasswordPolicy` centralises the password complexity rule: 16–20 characters, at least one uppercase, one lowercase, one digit, one special character (`@$!%*?&`). Previously a `@Pattern` on DTO fields, now checked against decrypted plaintext in service code.
 
 **Password change flows:**
 
@@ -173,6 +184,11 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 
 - Controllers are thin — no business logic, just parameter extraction and service delegation.
 - Services throw `IllegalArgumentException` (→ 400) or `NoSuchElementException` (→ 404); `GlobalExceptionHandler` maps these.
+- Any method that writes to the DB must be `@Transactional`. Read-only methods benefit from `@Transactional(readOnly = true)`.
+- Logging: SLF4J only (`LoggerFactory.getLogger`), never `System.out.println`. Sensitive data (passwords, OTPs) must never appear in INFO-level logs.
+- Timestamps: use `@CreationTimestamp`, not `LocalDateTime.now()` in field initialisers.
+- `app.dev-otp-enabled=true` (set only in `application-local.properties`) returns OTPs in API responses for local development. Never enable in production.
+- Commit message format: `<type>: <short imperative summary>` — types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
 - Placement test thresholds: `< 20 WPM → BASIC`, `20–39 → INTERMEDIATE`, `≥ 40 → ADVANCED`.
 - WPM formula: `(charsTyped / 5) / elapsedMinutes`. Accuracy: `(correctKeys / totalKeys) * 100`.
 - The H2 console is gated by `spring.h2.console.enabled`; frame-options are only disabled when that flag is true.

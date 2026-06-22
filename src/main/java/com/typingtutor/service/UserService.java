@@ -9,6 +9,7 @@ import com.typingtutor.repository.UserRepository;
 import com.typingtutor.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +36,15 @@ public class UserService {
     private final OtpService otpService;
     private final EmailService emailService;
     private final AuditLogService auditLogService;
+
+    // Deliberately decoupled from EmailService.isMailEnabled(): devOtp must only ever be exposed
+    // in a local/dev properties file, never as a fallback for misconfigured mail in any other
+    // environment (that would leak OTP codes directly in API responses).
+    @Value("${app.dev-otp-enabled:false}")
+    private boolean devOtpEnabled;
+
+    private static final String EMAIL_SEND_FAILED_WARNING =
+            "We couldn't send the email right now. Please try \"Resend OTP\" in a few minutes.";
 
     public UserService(UserRepository userRepository,
                        UserPerformanceRepository performanceRepository,
@@ -80,14 +90,16 @@ public class UserService {
         user = userRepository.save(user);
 
         EmailVerification ev = otpService.createOtp(user.getId(), "VERIFY_EMAIL");
-        emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "VERIFY_EMAIL", user.getUsername());
-        log.debug("Registration OTP sent for user={}", user.getUsername());
+        boolean emailSent = emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "VERIFY_EMAIL", user.getUsername());
+        log.debug("Registration OTP send attempt for user={} — sent={}", user.getUsername(), emailSent);
 
         Map<String, Object> result = new HashMap<>();
         result.put("message", "Registration successful. Please verify your email with the OTP sent to " + user.getEmail());
         result.put("email", user.getEmail());
-        if (!emailService.isMailEnabled()) {
+        if (devOtpEnabled) {
             result.put("devOtp", ev.getOtpCode());
+        } else if (!emailSent) {
+            result.put("emailWarning", EMAIL_SEND_FAILED_WARNING);
         }
         return result;
     }
@@ -109,7 +121,8 @@ public class UserService {
         auditLogService.log(user.getUsername(), "EMAIL_VERIFIED", "Email verified: " + user.getEmail());
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
         log.debug("Email verified for user={}", user.getUsername());
-        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
+        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name(),
+                true, isEffectivePlacementCompleted(user));
     }
 
     @Transactional
@@ -163,13 +176,15 @@ public class UserService {
         if (!user.isPasswordChanged() && hasEmail) {
             log.info("[LOGIN] First-login OTP flow triggered for username='{}'", request.getUsername());
             EmailVerification ev = otpService.createOtp(user.getId(), "FIRST_LOGIN");
-            emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "FIRST_LOGIN", user.getUsername());
+            boolean emailSent = emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "FIRST_LOGIN", user.getUsername());
             Map<String, Object> firstLogin = new HashMap<>();
             firstLogin.put("requiresPasswordChange", true);
             firstLogin.put("email", user.getEmail());
             firstLogin.put("message", "A one-time password has been sent to your email. Please verify to continue.");
-            if (!emailService.isMailEnabled()) {
+            if (devOtpEnabled) {
                 firstLogin.put("devOtp", ev.getOtpCode());
+            } else if (!emailSent) {
+                firstLogin.put("emailWarning", EMAIL_SEND_FAILED_WARNING);
             }
             return firstLogin;
         }
@@ -177,7 +192,8 @@ public class UserService {
         log.info("[LOGIN] Success — issuing token for username='{}'", request.getUsername());
         auditLogService.log(user.getUsername(), "LOGIN", "Successful login");
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
+        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name(),
+                user.isEmailVerified(), isEffectivePlacementCompleted(user));
     }
 
     @Transactional
@@ -228,9 +244,11 @@ public class UserService {
         result.put("message", "If an account exists for that email, a reset OTP has been sent.");
         userRepository.findByEmail(email).ifPresent(user -> {
             EmailVerification ev = otpService.createOtp(user.getId(), "RESET_PASSWORD");
-            emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "RESET_PASSWORD", user.getUsername());
-            if (!emailService.isMailEnabled()) {
+            boolean emailSent = emailService.sendOtp(user.getEmail(), ev.getOtpCode(), "RESET_PASSWORD", user.getUsername());
+            if (devOtpEnabled) {
                 result.put("devOtp", ev.getOtpCode());
+            } else if (!emailSent) {
+                result.put("emailWarning", EMAIL_SEND_FAILED_WARNING);
             }
         });
         return result;
@@ -241,12 +259,14 @@ public class UserService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("No account found for that email."));
         EmailVerification ev = otpService.createOtp(user.getId(), purpose);
-        emailService.sendOtp(user.getEmail(), ev.getOtpCode(), purpose, user.getUsername());
+        boolean emailSent = emailService.sendOtp(user.getEmail(), ev.getOtpCode(), purpose, user.getUsername());
 
         Map<String, Object> result = new HashMap<>();
         result.put("message", "OTP resent to " + email);
-        if (!emailService.isMailEnabled()) {
+        if (devOtpEnabled) {
             result.put("devOtp", ev.getOtpCode());
+        } else if (!emailSent) {
+            result.put("emailWarning", EMAIL_SEND_FAILED_WARNING);
         }
         return result;
     }
@@ -257,6 +277,7 @@ public class UserService {
                 .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
         boolean emailChanged = false;
         String devOtp = null;
+        String emailWarning = null;
         if (req.getFullName() != null) user.setFullName(req.getFullName());
         if (req.getEmail() != null && !req.getEmail().isBlank()
                 && !req.getEmail().equals(user.getEmail())) {
@@ -267,8 +288,12 @@ public class UserService {
             user.setEmailVerified(false);
             user.setEmailVerificationDeadline(LocalDateTime.now().plusDays(2));
             EmailVerification ev = otpService.createOtp(user.getId(), "VERIFY_EMAIL");
-            emailService.sendOtp(req.getEmail(), ev.getOtpCode(), "VERIFY_EMAIL", user.getUsername());
-            if (!emailService.isMailEnabled()) devOtp = ev.getOtpCode();
+            boolean emailSent = emailService.sendOtp(req.getEmail(), ev.getOtpCode(), "VERIFY_EMAIL", user.getUsername());
+            if (devOtpEnabled) {
+                devOtp = ev.getOtpCode();
+            } else if (!emailSent) {
+                emailWarning = EMAIL_SEND_FAILED_WARNING;
+            }
             auditLogService.log(username, "EMAIL_UPDATED", "Email changed to: " + req.getEmail());
             emailChanged = true;
         }
@@ -278,7 +303,7 @@ public class UserService {
         if (req.getClassYear() != null) user.setClassYear(req.getClassYear());
         if (req.getCourseSpecialization() != null) user.setCourseSpecialization(req.getCourseSpecialization());
         if (req.getOccupation() != null) user.setOccupation(req.getOccupation());
-        return new ProfileUpdateResult(userRepository.save(user), devOtp, emailChanged);
+        return new ProfileUpdateResult(userRepository.save(user), devOtp, emailChanged, emailWarning);
     }
 
     public User getUserByUsername(String username) {

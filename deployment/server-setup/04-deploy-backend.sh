@@ -26,11 +26,16 @@ DATABASE_USERNAME=typemaster
 DATABASE_PASSWORD=${DB_PASSWORD}
 JWT_SECRET=${JWT_SECRET}
 
-# Brevo SMTP (https://app.brevo.com → SMTP & API)
-MAIL_HOST=smtp-relay.brevo.com
+# Gmail SMTP — yourtypemaster@gmail.com is the standard sender for OTPs and support.
+# MAIL_PASSWORD must be a Gmail "App Password" (Google Account > Security > App Passwords;
+# requires 2FA enabled on the account), NOT the regular account password.
+# If OTP volume grows or Gmail's sending limits/throttling become a problem, switch to a
+# dedicated transactional provider (Brevo, SendGrid, etc.) with yourtypemaster@gmail.com
+# configured as the verified "From" sender there instead.
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=your-brevo-email@example.com
-MAIL_PASSWORD=your-brevo-smtp-api-key
+MAIL_USERNAME=yourtypemaster@gmail.com
+MAIL_PASSWORD=your-gmail-app-password
 
 # Your domain (set after DNS is configured)
 FRONTEND_URL=https://your-domain.duckdns.org

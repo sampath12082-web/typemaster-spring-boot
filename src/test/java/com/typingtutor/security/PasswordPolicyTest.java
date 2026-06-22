@@ -38,8 +38,27 @@ class PasswordPolicyTest {
     }
 
     @Test
-    void exactlyEightChars_isValid() {
-        assertThat(PasswordPolicy.isValid("Abcd@123")).isTrue();
+    void fifteenChars_isInvalid() {
+        // "Abcdefg@Hij1234" — 15 chars, one below the 16-char minimum
+        assertThat(PasswordPolicy.isValid("Abcdefg@Hij1234")).isFalse();
+    }
+
+    @Test
+    void exactlySixteenChars_isValid() {
+        // "Abcdefg@Hij12345" — exactly 16 chars, the new minimum
+        assertThat(PasswordPolicy.isValid("Abcdefg@Hij12345")).isTrue();
+    }
+
+    @Test
+    void exactlyTwentyChars_isValid() {
+        // "Abcdefghij@Klm12345" + 1 — exactly 20 chars, the new maximum
+        assertThat(PasswordPolicy.isValid("Abcdefghij@Klmno1234")).isTrue();
+    }
+
+    @Test
+    void twentyOneChars_isInvalid() {
+        // one char over the new 20-char maximum
+        assertThat(PasswordPolicy.isValid("Abcdefghij@Klmno12345")).isFalse();
     }
 
     @Test
