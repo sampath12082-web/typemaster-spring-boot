@@ -18,24 +18,26 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final boolean mailEnabled;
-
-    @Value("${spring.mail.username:}")
-    private String fromAddress;
+    private final String fromAddress;
 
     public EmailService(@Autowired(required = false) JavaMailSender mailSender,
                         @Value("${spring.mail.username:}") String mailUsername) {
         this.mailSender = mailSender;
         this.mailEnabled = mailSender != null && !mailUsername.isBlank();
+        this.fromAddress = mailUsername;
     }
 
     public boolean isMailEnabled() {
         return mailEnabled;
     }
 
-    public void sendOtp(String toEmail, String otp, String purpose, String userName) {
+    /** @return true if the email was actually handed off to the mail server, false otherwise
+     *  (mail disabled, or the send itself failed — callers should not assume the user received it
+     *  just because this method was called without throwing). */
+    public boolean sendOtp(String toEmail, String otp, String purpose, String userName) {
         String subject = buildOtpSubject(purpose);
         String body = buildOtpBody(userName, otp, purpose);
-        send(toEmail, subject, body);
+        return send(toEmail, subject, body);
     }
 
     public void sendWelcome(String toEmail, String userName) {
@@ -68,10 +70,10 @@ public class EmailService {
         }
     }
 
-    private void send(String toEmail, String subject, String htmlBody) {
+    private boolean send(String toEmail, String subject, String htmlBody) {
         if (!mailEnabled) {
-            log.info("Mail disabled — would send to={} subject='{}'", toEmail, subject);
-            return;
+            log.warn("Mail disabled (spring.mail.username not set) — NOT sending to={} subject='{}'", toEmail, subject);
+            return false;
         }
         try {
             MimeMessage msg = mailSender.createMimeMessage();
@@ -82,8 +84,10 @@ public class EmailService {
             helper.setText(htmlBody, true);
             mailSender.send(msg);
             log.info("Email sent to {} — subject: {}", toEmail, subject);
+            return true;
         } catch (Exception e) {
-            log.error("Failed to send email to {}: {}", toEmail, e.getMessage());
+            log.error("Failed to send email to {} — subject '{}': {}", toEmail, subject, e.getMessage(), e);
+            return false;
         }
     }
 

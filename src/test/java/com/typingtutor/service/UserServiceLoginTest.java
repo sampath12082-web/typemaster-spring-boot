@@ -161,7 +161,6 @@ class UserServiceLoginTest {
         com.typingtutor.entity.EmailVerification ev = new com.typingtutor.entity.EmailVerification();
         ev.setOtpCode("123456");
         when(otpService.createOtp(any(), any())).thenReturn(ev);
-        when(emailService.isMailEnabled()).thenReturn(false);
 
         Object result = userService.login(loginRequest);
 

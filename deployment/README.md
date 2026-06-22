@@ -177,10 +177,10 @@ DATABASE_URL=jdbc:postgresql://localhost:5432/typemaster
 DATABASE_USERNAME=typemaster
 DATABASE_PASSWORD=<choose a strong password>
 JWT_SECRET=<base64 encoded 32-byte random string>
-MAIL_HOST=smtp-relay.brevo.com
+MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
-MAIL_USERNAME=<your Brevo account email>
-MAIL_PASSWORD=<your Brevo SMTP API key>
+MAIL_USERNAME=yourtypemaster@gmail.com
+MAIL_PASSWORD=<Gmail App Password — Google Account > Security > App Passwords, requires 2FA>
 FRONTEND_URL=https://your-domain.duckdns.org
 ```
 
@@ -247,7 +247,7 @@ sudo certbot renew
 | PostgreSQL | Self-hosted on VM | $0 |
 | SSL certificate | Let's Encrypt | $0 |
 | Domain name | DuckDNS / FreeDNS | $0 |
-| Email (300/day) | Brevo free tier | $0 |
+| Email (~500/day) | Gmail SMTP (yourtypemaster@gmail.com) | $0 |
 | **Total** | | **$0/month** |
 
 ---
