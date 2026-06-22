@@ -54,7 +54,9 @@ public class CertificateService {
 
         // Email the certificate
         if (user.getEmail() != null && !user.getEmail().isBlank()) {
-            emailService.sendCertificate(user.getEmail(), user.getUsername(),
+            String displayName = (user.getFullName() != null && !user.getFullName().isBlank())
+                    ? user.getFullName() : user.getUsername();
+            emailService.sendCertificate(user.getEmail(), displayName,
                     attempt.getExam().getDifficultyLevel().name(), pdf);
         }
         log.info("Certificate issued: id={} user={} tier={}", cert.getCertificateId(),
