@@ -109,7 +109,8 @@ public class UserService {
         auditLogService.log(user.getUsername(), "EMAIL_VERIFIED", "Email verified: " + user.getEmail());
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
         log.debug("Email verified for user={}", user.getUsername());
-        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
+        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name(),
+                true, isEffectivePlacementCompleted(user));
     }
 
     @Transactional
@@ -177,7 +178,8 @@ public class UserService {
         log.info("[LOGIN] Success — issuing token for username='{}'", request.getUsername());
         auditLogService.log(user.getUsername(), "LOGIN", "Successful login");
         String token = jwtUtil.generateToken(user.getUsername(), user.getRole().name());
-        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name());
+        return new AuthResponse(token, user.getUsername(), user.getId(), user.getRole().name(),
+                user.isEmailVerified(), isEffectivePlacementCompleted(user));
     }
 
     @Transactional
