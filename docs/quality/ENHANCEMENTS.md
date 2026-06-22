@@ -1,6 +1,6 @@
 # TypeMaster — Enhancement Tracker
 
-_Last updated: 2026-06-16_
+_Last updated: 2026-06-17_
 
 > **Status key:** ⏳ Pending · 🔄 In Progress · ✅ Done · 🚫 Won't Fix · ⬇️ Deferred
 
@@ -10,11 +10,20 @@ _Last updated: 2026-06-16_
 |---|--------|------|-------------|-----------|------|
 | E-1 | ✅ Done | Typing Engine | Disable backspace — errors cannot be corrected mid-lesson; cursor stays in place, wrong chars remain red | 2026-06-12 | 2026-06-12 |
 | E-2 | ✅ Done | Audit Logging | Capture full user activity audit log — login/logout timestamps, lesson progress saves, profile changes, password resets, exam submissions; excludes passive browsing | 2026-06-12 | 2026-06-15 |
-| E-3 | 🔄 In Progress | Auth | Password strength standards — enforce minimum length, complexity rules on register, change-password, admin create user, and admin reset password flows | 2026-06-12 | — |
-| E-4 | ⏳ Pending | UX | Tooltips — add contextual tooltips throughout the application wherever a UI element benefits from a short explanation (lesson lock reasons, WPM/accuracy thresholds, exam rules, admin actions) | 2026-06-12 | — |
+| E-3 | ✅ Done | Auth | Password strength standards — 16-20 chars + uppercase/lowercase/digit/special enforced on all flows (backend PasswordPolicy, frontend PASSWORD_RE, E2E test fixtures, PasswordStrength component) | 2026-06-12 | 2026-06-17 |
+| E-4 | ✅ Done | UX | Password-field tooltips — inline hint text and ⓘ tooltip added to password fields on RegisterPage and ChangePasswordPage | 2026-06-12 | 2026-06-17 |
 | E-5 | ✅ Done | Placement Test | Allow users to skip the placement test — new users skip to BASIC tier lesson 1; returning users skip to continue where they left off | 2026-06-12 | 2026-06-15 |
 | E-6 | ⏳ Pending | Placement Test | Show logout button on the placement test page/modal so users can exit the app without completing placement | 2026-06-12 | — |
 | E-7 | ✅ Done | Security | Encrypt passwords client-side before they leave the browser — request payloads (login, register, change-password, admin create-user) were showing plaintext passwords in DevTools → Network. RSA-OAEP, defense-in-depth on top of TLS. | 2026-06-16 | 2026-06-16 |
+| E-8 | ⬇️ Deferred | Auth | Three secret questions for account recovery — requires new entity, schema, 3+ endpoints, and new pages; too large for incremental work. See detail below for full spec. | 2026-06-16 | — |
+| E-9 | ✅ Done | Admin | Admin "reset password" now emails an OTP to user's registered address; falls back to 16-char temp password for no-email users with clipboard copy button | 2026-06-16 | 2026-06-17 |
+| E-10 | ✅ Done | Performance | Eliminated post-login /me round-trip: AuthResponse now includes emailVerified + placementCompleted; AuthContext.login() skips redundant /me call | 2026-06-16 | 2026-06-17 |
+| E-11 | ✅ Done | Help | Help page: "Ticket #X" surfaced in My Tickets list; form area clearer with distinct "Open a support ticket" / "Report a bug" buttons | 2026-06-16 | 2026-06-17 |
+| E-12 | ✅ Done | Help | "Report a bug" button added to Help page — pre-fills subject with "[BUG] " prefix, distinct visual style, uses existing Inquiry infrastructure | 2026-06-16 | 2026-06-17 |
+| E-13 | ✅ Done | UX | About page added at `/about` — mission, feature grid, tech stack, support link; linked from Navbar | 2026-06-16 | 2026-06-17 |
+| E-14 | ✅ Done | Email | `yourtypemaster@gmail.com` now configured as sender in all environments; Gmail SMTP standardized; Brevo references removed | 2026-06-16 | 2026-06-17 |
+| E-15 | ✅ Done | Certificates | Certificates now use full name with username fallback in both PDF generation and email notification | 2026-06-16 | 2026-06-17 |
+| E-16 | ⬇️ Deferred | Certificates | Certificate visual template blocked — `CertificateService` overlay code is fully wired; only the PNG asset (`src/main/resources/templates/certificate-template.png`) is missing from the repo | 2026-06-16 | — |
 
 ---
 
@@ -80,11 +89,23 @@ if (key === 'Backspace') return
 
 ---
 
-## E-3 · 🔄 In Progress · Password Strength Standards
+## E-3 · ✅ Done · Password Strength Standards
 
 **Request:** Enforce password complexity on all flows that set a password.
 
-**Rules:**
+**Update (2026-06-16):** length requirement raised — minimum **16** characters, maximum **20**
+characters, aligned to "latest market security standards." This supersedes the original 8-100
+char range below; the current `PasswordPolicy` (backend `security/PasswordPolicy.java`) and
+`PASSWORD_RE` regex (frontend, duplicated across `RegisterPage.jsx`, `ChangePasswordPage.jsx`,
+`ProfilePage.jsx`, `AdminPage.jsx`) both need their length bounds updated to match.
+
+> **Open question for implementation:** "latest market security standards" (e.g. NIST SP 800-63B)
+> actually favors *length over composition* — i.e. allowing long passphrases and dropping forced
+> uppercase/digit/special-character rules, rather than stacking both a longer minimum length *and*
+> composition requirements. Decide at implementation time whether to keep the existing composition
+> rules alongside the new 16-20 length window, or relax composition in favor of length alone.
+
+**Rules (original, 8 char minimum — see update above for the new 16-20 window):**
 - Minimum 8 characters
 - At least one uppercase letter
 - At least one lowercase letter
@@ -131,6 +152,8 @@ if (key === 'Backspace') return
 | Admin — users table | Toggle active | "Deactivated users cannot log in until reactivated" |
 | Admin — users table | Delete user | "Permanently deletes the user and all their data. This cannot be undone." |
 | Profile — recommended tier | Tier badge | "Based on your placement test result" |
+| Register page | Password field | "16-20 characters — see strength meter below" (added 2026-06-16, paired with E-3's new length rule) |
+| Change-password (Profile page) | New password field | Same as above — consistent wording with Register |
 
 **Implementation approach:**
 - Shared `Tooltip` component wrapping the child element with a `title`-like hover overlay (Tailwind-styled, no library dependency)
@@ -204,6 +227,168 @@ the real password to authenticate it.
 - Wired into `AuthContext` (`login`, `register`), `ChangePasswordPage`, `ProfilePage` (change-
   password card), and `AdminPage` (create-user form) — all four password-carrying submissions now
   send ciphertext instead of plaintext.
+
+---
+
+## E-8 · ⏳ Pending · Three Secret Questions for Account Recovery
+
+**Request:** Add a second-factor-style security control: 3 secret questions set up by the user,
+usable as an alternative path into the forgot-password flow.
+
+**Scope:**
+- User picks (or answers) 3 secret questions, likely during registration or as a profile setting
+  users can complete later — needs a decision on whether this is mandatory at signup or an
+  optional profile addition (open question, not decided here).
+- Answer inputs are **masked** (`type="password"`-style) while typing, with a reveal/eye-icon
+  toggle — consistent with how password fields already behave elsewhere in the app
+  (`PasswordStrength`-adjacent UX, not the same component).
+- Answers should be hashed at rest (BCrypt, same as the password column) — never stored or
+  compared in plaintext, and never returned to the client once set.
+- **Forgot-password integration:** offer "Answer your secret questions instead" as an alternative
+  to the existing OTP-based forgot-password flow (`POST /api/auth/forgot-password` →
+  `VerifyEmailPage` → `ChangePasswordPage`). Successful answers should grant the same short-lived
+  `changePasswordToken` the OTP path already produces, reusing `JwtUtil.generateChangePasswordToken`
+  rather than inventing a parallel mechanism.
+
+**Open questions for implementation:** fixed question bank vs. user-authored questions; whether
+answers are case/whitespace-normalized before hashing (recommended, to avoid recovery failures
+over trivial formatting differences); lockout/rate-limiting on wrong-answer attempts (mirror
+`OtpService`'s existing 5-attempt lockout pattern).
+
+---
+
+## E-9 · ⏳ Pending · Admin Reset Password Sends OTP Instead of a Temp Password
+
+**Request:** `AdminService.resetPassword()` currently generates a random temporary password that
+the admin must manually share with the user (see `SECURITY_AUDIT.md` history — temp-password
+exposure was already a flagged concern). Replace this with: admin triggers a reset → an OTP is
+emailed to the user's **registered** address → user completes the existing OTP → change-password
+flow themselves, the same way `RESET_PASSWORD`/`FIRST_LOGIN` OTPs already work.
+
+**Scope:**
+- `AdminController.resetPassword` / `AdminService.resetPassword()` — instead of generating and
+  setting a random password directly, call into the existing `OtpService.createOtp(userId,
+  "RESET_PASSWORD")` + `EmailService.sendOtp(...)` path and leave the user's current password
+  untouched until they complete the OTP flow.
+- Decide how this should behave for **no-email users** (admin-created users without an email
+  cannot receive an OTP) — likely needs to keep the current temp-password behavior as a fallback
+  specifically for that case, consistent with how no-email users already skip OTP elsewhere
+  (see B-1/B-2 history in `BUGS.md`).
+- Frontend: `AdminPage.jsx`'s "Reset pwd" button/flash message text needs updating to reflect
+  "OTP sent to user's email" instead of "temporary password generated."
+
+---
+
+## E-10 · ✅ Done · Improve Login Performance
+
+**Root cause identified:** Frontend `AuthContext.login()` was making a redundant `authApi.me()` call immediately after login to fetch `emailVerified` and `placementCompleted` — two sequential HTTP round-trips just to establish a session. `DashboardPage` then called `/me` again on mount, totalling three `/me` calls for a normal login.
+
+**Fix implemented:**
+- `AuthResponse.java` now includes `emailVerified` and `placementCompleted` fields.
+- `UserService.login()` and `UserService.verifyEmail()` both pass these values when constructing `AuthResponse`.
+- `AuthContext.login()` uses the login response directly — no more post-login `/me` call.
+- Net result: login goes from 2 sequential API calls (login + me) to 1 (login only).
+
+**Remaining opportunities (not implemented — document for future work):**
+- BCrypt default cost 10 (~100ms/verify) is appropriate for production; no change recommended.
+- First-login and forgot-password OTP sends are still synchronous (mail latency appears as login latency). Could be made async with `@Async` / `CompletableFuture`, but needs careful handling since callers currently use the boolean return to decide whether to show `emailWarning`.
+
+**Files:** `AuthResponse.java`, `UserService.java`, `AuthContext.jsx`
+
+---
+
+## E-11 · ⏳ Pending · Help Module Redesign + Issue Numbers
+
+**Request:** The Help page (`HelpPage.jsx` / `InquiryService`) is cluttered. Segregate content into
+clearer sections and make submitted questions/tickets trackable by number.
+
+**Scope:**
+- Visually separate FAQ/self-serve content from the "ask a question" submission form and from the
+  user's own inquiry history — currently appears to blend together (per `CODE_REVIEW.md` FM-13,
+  FAQ answers are also clipped at a fixed height, worth revisiting in the same pass).
+- Surface the existing `Inquiry` entity's `id` to the user as a visible "Ticket #123" reference
+  when they submit and when they view their inquiry history, so they can reference it in
+  follow-up communication.
+
+---
+
+## E-12 · ⏳ Pending · Let Users Report a Bug
+
+**Request:** Add a distinct "Report a bug" entry point, separate from the general help/question
+flow.
+
+**Scope:**
+- Likely reuses the existing `Inquiry` infrastructure (`InquiryService`, `inquiry_id` ticket
+  number from E-11) with an added category/type field (e.g. `BUG_REPORT` vs. general `QUESTION`)
+  so admins can filter/triage bug reports separately in the admin Inquiries tab.
+- Consider what context to auto-capture with a bug report (current page/route, browser info) to
+  reduce back-and-forth — not decided here.
+
+---
+
+## E-13 · ⏳ Pending · Add an "About" Section
+
+**Request:** Add an About section to the app. Content ideas requested — brainstormed options below
+for the user to pick from before implementation:
+
+- **App overview / mission** — what TypeMaster is and why it exists (structured touch-typing
+  practice with measurable progress), in 2-3 sentences.
+- **How it works** — short visual walkthrough of the placement test → tiered lessons → certification
+  exam → certificate pipeline, reusing language already established in `HelpAgentService`'s product
+  knowledge system prompt.
+- **Support / contact** — ties directly into E-14's support address.
+- **Version / what's new** — lightweight changelog of recent features (could pull from this
+  `ENHANCEMENTS.md` tracker's "Done" rows rather than maintaining a separate changelog).
+- **FAQ link** — cross-link into the redesigned Help section (E-11) rather than duplicating content.
+- **Credits/team** — optional, lowest priority.
+
+No decision made yet on which of these to include — needs a follow-up pick before implementation.
+
+---
+
+## E-14 · ⏳ Pending · Support / OTP Sender Address
+
+**Request:** Use `yourtypemaster@gmail.com` for both the OTP-sending mailbox and the support
+contact address shown to users.
+
+**Scope:**
+- `spring.mail.username` / `MAIL_USERNAME` (and corresponding `MAIL_PASSWORD`/app-password) updated
+  to this address in all environments (`application.properties`, `application-local.properties`,
+  production env vars on Render).
+- Any hardcoded support-contact text in the frontend (Help page, About section per E-13, footer if
+  any) updated to reference this address.
+- Should land together with the B-7 OTP-email fix — no point switching the sender address on a
+  send path that's currently broken.
+
+---
+
+## E-15 · ⏳ Pending · Certificates Should Use Full Name, Not Username
+
+**Request:** Certificates currently print the account username; they should print the user's full
+name instead.
+
+**Scope:**
+- `CertificateService`'s PDF generation reads from `User.getFullName()` instead of
+  `User.getUsername()` for the printed name field.
+- Handle the case where `fullName` is blank/unset (older accounts, or admin-created users) — needs
+  a fallback decision (fall back to username vs. block certificate generation until profile is
+  completed) — not decided here.
+
+---
+
+## E-16 · ⏳ Pending · Restore Previous Certificate Design
+
+**Request:** An earlier certificate visual design/style existed but isn't what's currently being
+generated. Review old files and bring the original design back.
+
+**Scope:**
+- Look for a prior certificate template/layout (PDFBox drawing code in `CertificateService`, or
+  any design assets/mockups) in git history or old project files — current implementation may have
+  regressed or simplified the layout at some point.
+- Once located, compare against the current `CertificateService` PDF generation and restore the
+  original look (fonts, borders/border art, seal/badge placement, color scheme) without
+  reintroducing any bugs that prompted the simplification in the first place (check `BUGS.md`/
+  `CODE_REVIEW.md` history for any certificate-related fixes before reverting wholesale).
 
 ---
 
