@@ -10,10 +10,10 @@ import java.util.regex.Pattern;
 public final class PasswordPolicy {
 
     public static final String MESSAGE =
-            "Password must be 8-100 characters with uppercase, lowercase, digit and special character (@$!%*?&)";
+            "Password must be 16-20 characters with uppercase, lowercase, digit and special character (@$!%*?&)";
 
     private static final Pattern PATTERN =
-            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,100}$");
+            Pattern.compile("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{16,20}$");
 
     private PasswordPolicy() {}
 
