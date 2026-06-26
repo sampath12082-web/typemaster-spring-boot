@@ -97,6 +97,10 @@ public class AuthController {
         resp.put("emailVerified",               user.isEmailVerified());
         resp.put("emailVerificationDeadline",   user.getEmailVerificationDeadline() != null
                 ? user.getEmailVerificationDeadline().toString() : null);
+        UserStatsDto stats = userService.getUserStats(user);
+        resp.put("averageWpm",        stats.getAverageWpm());
+        resp.put("lessonsCompleted",  stats.getLessonsCompleted());
+        resp.put("totalCompleted",    stats.getTotalCompleted());
         return ResponseEntity.ok(resp);
     }
 

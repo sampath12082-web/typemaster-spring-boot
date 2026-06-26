@@ -319,7 +319,12 @@ public class UserService {
 
     public UserStatsDto getUserStats(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
+        return getUserStats(user);
+    }
+
+    @Transactional(readOnly = true)
+    public UserStatsDto getUserStats(User user) {
         UserStatsDto stats = new UserStatsDto();
         stats.setUsername(user.getUsername());
         stats.setLessonsCompleted((int) performanceRepository.countDistinctLessonsByUserId(user.getId()));
