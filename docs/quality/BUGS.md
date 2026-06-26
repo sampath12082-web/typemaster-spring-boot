@@ -83,10 +83,10 @@ _Last updated: 2026-06-17_
 
 ---
 
-### B-8 · ⏳ Open · No real E2E test coverage for send-OTP-email
+### B-8 · ⬇️ Deferred · No real E2E test coverage for send-OTP-email
 **Reported:** Existing E2E tests (`10-otp.spec.js` etc.) only exercise the `devOtp` shortcut returned in the API response when `EmailService.isMailEnabled()` is false — they never verify a real email actually gets sent and received.
 **Needed:** Frontend-to-email **end-to-end** test coverage, not backend-only: trigger the OTP flow through the real UI (register / resend / forgot-password), and verify an actual email was sent and is usable — e.g. via a test mailbox/inbox API (Mailtrap, Mailosaur, or similar), or at minimum asserting against the mail server logs/send confirmation rather than the `devOtp` bypass. Should run as part of the regular Playwright suite, tagged so it can be skipped in environments without a test-mailbox provider configured.
-**Depends on:** B-7 being fixed first (no point writing E2E coverage for a flow that's currently broken).
+**Depends on:** B-7 is now fixed; this item remains deferred until a test mailbox provider is configured.
 
 ---
 

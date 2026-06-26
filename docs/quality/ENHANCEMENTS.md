@@ -11,9 +11,9 @@ _Last updated: 2026-06-17_
 | E-1 | ✅ Done | Typing Engine | Disable backspace — errors cannot be corrected mid-lesson; cursor stays in place, wrong chars remain red | 2026-06-12 | 2026-06-12 |
 | E-2 | ✅ Done | Audit Logging | Capture full user activity audit log — login/logout timestamps, lesson progress saves, profile changes, password resets, exam submissions; excludes passive browsing | 2026-06-12 | 2026-06-15 |
 | E-3 | ✅ Done | Auth | Password strength standards — 16-20 chars + uppercase/lowercase/digit/special enforced on all flows (backend PasswordPolicy, frontend PASSWORD_RE, E2E test fixtures, PasswordStrength component) | 2026-06-12 | 2026-06-17 |
-| E-4 | ✅ Done | UX | Password-field tooltips — inline hint text and ⓘ tooltip added to password fields on RegisterPage and ChangePasswordPage | 2026-06-12 | 2026-06-17 |
+| E-4 | 🔄 Partial | UX | Password-field tooltips — inline hint text and ⓘ tooltip added to password fields on RegisterPage and ChangePasswordPage | 2026-06-12 | — |
 | E-5 | ✅ Done | Placement Test | Allow users to skip the placement test — new users skip to BASIC tier lesson 1; returning users skip to continue where they left off | 2026-06-12 | 2026-06-15 |
-| E-6 | ⏳ Pending | Placement Test | Show logout button on the placement test page/modal so users can exit the app without completing placement | 2026-06-12 | — |
+| E-6 | ✅ Done | Placement Test | Show logout button on the placement test page/modal so users can exit the app without completing placement | 2026-06-12 | 2026-06-17 |
 | E-7 | ✅ Done | Security | Encrypt passwords client-side before they leave the browser — request payloads (login, register, change-password, admin create-user) were showing plaintext passwords in DevTools → Network. RSA-OAEP, defense-in-depth on top of TLS. | 2026-06-16 | 2026-06-16 |
 | E-8 | ⬇️ Deferred | Auth | Three secret questions for account recovery — requires new entity, schema, 3+ endpoints, and new pages; too large for incremental work. See detail below for full spec. | 2026-06-16 | — |
 | E-9 | ✅ Done | Admin | Admin "reset password" now emails an OTP to user's registered address; falls back to 16-char temp password for no-email users with clipboard copy button | 2026-06-16 | 2026-06-17 |

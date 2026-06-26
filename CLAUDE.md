@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repository is
 
-This is the **Spring Boot backend** for TypeMaster, a touch-typing tutor web app. The React + Vite frontend lives in a sibling directory (`../frontend`) and is **not** tracked in this repo.
+This is the **Spring Boot backend** for TypeMaster, a touch-typing tutor web app. The React + Vite frontend lives in a sibling directory (`../typemaster-ui`) and is **not** tracked in this repo.
 
 - Backend API: `http://localhost:8080`
 - Frontend dev server: `http://localhost:5173` (proxies `/api/*` to the backend)
@@ -124,6 +124,7 @@ PostgreSQL everywhere — local dev and production both use it. Connection reads
 - Change-password tokens carry a `"purpose": "CHANGE_PASSWORD"` claim and expire in 15 minutes.
 - No server-side token blacklist; logout is client-side only.
 - Admin endpoints (`/api/admin/**`) require `ROLE_ADMIN` at both the filter chain and `@PreAuthorize`.
+- `GET /api/auth/leaderboard` — public endpoint returning top users ranked by WPM.
 
 ### Password transport encryption
 
@@ -141,6 +142,18 @@ PostgreSQL everywhere — local dev and production both use it. Connection reads
 | Authenticated change | `PUT /api/auth/me/password` | JWT required | Logged-in user voluntarily changing their password |
 
 `PUT /api/auth/me/password` body: `{ currentPassword, newPassword }`. Validates current password via BCrypt before accepting the new one; rejects if new == current. Same password regex as registration.
+
+### Dark mode
+
+Dark mode is fully implemented via ThemeContext with localStorage persistence (key: tt_theme) and system prefers-color-scheme detection. Toggle in Navbar. All pages and most components include dark: Tailwind variants.
+
+### Frontend pages
+
+| Route | Page | Description |
+|-------|------|-------------|
+| `/` | `LandingPage` | Marketing/intro page for unauthenticated visitors |
+| `/leaderboard` | `LeaderboardPage` | Public leaderboard showing top typists |
+| `/analytics` | `AnalyticsPage` | Per-user typing analytics and progress charts |
 
 ### Lesson progression model
 
@@ -166,15 +179,20 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 - **`AdminService`** — admin user CRUD/reset-password; deletes a user's `inquiries`/`certificates`/etc. in FK-safe order (see cascade order above)
 - **`InquiryService`** — support inquiry lifecycle (create, resolve, reopen) backing `InquiryController`
 - **`EmailService`** — sends verification/OTP/notification emails via `spring-boot-starter-mail`
+- **`UserService`** — auth, registration, login, profile updates, stats, rankings, leaderboard
+- **`PerformanceService`** — saves lesson attempt results, retrieves user history
 
 ### Environment variables
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `JWT_SECRET` | Yes | JWT signing secret (32+ chars) |
+| `DB_URL` | No | JDBC connection URL (default: `jdbc:postgresql://localhost:5432/typingtutor`) |
+| `DB_USERNAME` | No | Database username (default: `postgres`) |
+| `DB_PASSWORD` | No | Database password (default: `postgres`) |
 | `MAIL_HOST` / `MAIL_USERNAME` / `MAIL_PASSWORD` | No | SMTP; defaults to Gmail config |
 | `AI_API_KEY` | No | Anthropic API key for AI lesson generation |
-| `CORS_ALLOWED_ORIGIN_PATTERNS` | No | Overrides default `http://localhost:*` |
+| `CORS_ALLOWED_ORIGINS` | No | Overrides default `http://localhost:*` |
 
 ### Deployment
 
