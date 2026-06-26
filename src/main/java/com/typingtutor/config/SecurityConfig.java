@@ -55,7 +55,8 @@ public class SecurityConfig {
                     "/api/auth/verify-otp",
                     "/api/auth/change-password",
                     "/api/auth/forgot-password",
-                    "/api/certificates/*"
+                    "/api/certificates/**",
+                    "/actuator/health"
                 ).permitAll();
                 if (h2ConsoleEnabled) {
                     auth.requestMatchers("/h2-console/**").permitAll();

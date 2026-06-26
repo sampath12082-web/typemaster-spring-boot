@@ -39,6 +39,12 @@ public class LessonGenerationService {
     @Value("${app.ai.model:claude-haiku-4-5-20251001}")
     private String aiModel;
 
+    @Value("${app.lesson.min-wpm-advanced:50}")
+    private int advancedMinWpm;
+
+    @Value("${app.lesson.min-accuracy:85.0}")
+    private double minAccuracy;
+
     private final LessonRepository lessonRepository;
     private final UserPerformanceRepository performanceRepository;
     private final UserRepository userRepository;
@@ -101,8 +107,8 @@ public class LessonGenerationService {
         lesson.setDifficultyLevel(DifficultyLevel.ADVANCED);
         lesson.setContentText(generatedContent);
         lesson.setDisplayOrder(maxOrder + 1);
-        lesson.setMinWpm(50);
-        lesson.setMinAccuracy(85.0);
+        lesson.setMinWpm(advancedMinWpm);
+        lesson.setMinAccuracy(minAccuracy);
         lesson.setActive(true);
         lesson.setAiGenerated(true);
         lesson.setGeneratedForUserId(userId);
