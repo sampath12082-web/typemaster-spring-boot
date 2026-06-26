@@ -354,6 +354,22 @@ public class UserService {
         return r;
     }
 
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getLeaderboard() {
+        return performanceRepository.findLeaderboard().stream()
+                .map(row -> {
+                    Map<String, Object> entry = new java.util.LinkedHashMap<>();
+                    entry.put("userId", row[0]);
+                    String fullName = row[2] != null ? row[2].toString() : "";
+                    entry.put("displayName", fullName.isBlank() ? row[1].toString() : fullName);
+                    entry.put("bestWpm", ((Number) row[3]).intValue());
+                    entry.put("avgAccuracy", ((Number) row[4]).doubleValue());
+                    entry.put("totalRuns", ((Number) row[5]).longValue());
+                    return entry;
+                })
+                .toList();
+    }
+
     public static class EmailNotVerifiedException extends RuntimeException {
         private final String email;
 

@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -108,6 +109,11 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> ranking(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(userService.getRanking(userDetails.getUsername()));
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<Map<String, Object>>> leaderboard() {
+        return ResponseEntity.ok(userService.getLeaderboard());
     }
 
     @PutMapping("/me/password")

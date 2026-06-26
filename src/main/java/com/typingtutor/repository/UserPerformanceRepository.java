@@ -46,6 +46,12 @@ public interface UserPerformanceRepository extends JpaRepository<UserPerformance
     @Query("SELECT COUNT(DISTINCT p.user.id) FROM UserPerformance p")
     long countTypists();
 
+    @Query("SELECT p.user.id, p.user.username, p.user.fullName, MAX(p.wpm) as bestWpm, " +
+           "ROUND(AVG(p.accuracyPercentage), 1) as avgAccuracy, COUNT(p) as totalRuns " +
+           "FROM UserPerformance p GROUP BY p.user.id, p.user.username, p.user.fullName " +
+           "ORDER BY bestWpm DESC")
+    List<Object[]> findLeaderboard();
+
     @Modifying
     @Transactional
     @Query("DELETE FROM UserPerformance p WHERE p.user.id = :userId")
