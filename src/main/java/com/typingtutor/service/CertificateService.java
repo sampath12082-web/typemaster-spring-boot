@@ -64,13 +64,13 @@ public class CertificateService {
         return cert;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<CertificateDto> getUserCertificates(Long userId) {
         return certificateRepository.findByUserIdOrderByIssuedAtDesc(userId)
                 .stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public CertificateDto getCertificateByPublicId(String certificateId) {
         return certificateRepository.findByCertificateId(certificateId)
                 .map(this::toPublicDto)

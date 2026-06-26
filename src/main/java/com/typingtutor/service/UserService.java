@@ -334,6 +334,7 @@ public class UserService {
         return stats;
     }
 
+    @Transactional(readOnly = true)
     public Map<String, Object> getRanking(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));

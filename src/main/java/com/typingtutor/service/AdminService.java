@@ -65,6 +65,7 @@ public class AdminService {
         this.emailService = emailService;
     }
 
+    @Transactional(readOnly = true)
     public List<AdminUserDto> getAllUsers() {
         Map<Long, List<UserPerformance>> perfsByUser = performanceRepository.findAllWithUser()
             .stream().collect(Collectors.groupingBy(p -> p.getUser().getId()));
@@ -176,12 +177,14 @@ public class AdminService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     public List<InquiryDto> getAllInquiries() {
         return inquiryRepository.findAllByOrderByCreatedAtDesc().stream()
             .map(InquiryDto::from)
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public InquiryDto resolveInquiry(Long inquiryId, String response, String adminUsername) {
         Inquiry inq = inquiryRepository.findById(inquiryId)
             .orElseThrow(() -> new NoSuchElementException("Inquiry not found: " + inquiryId));

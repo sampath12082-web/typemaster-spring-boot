@@ -50,6 +50,7 @@ public class ExamService {
         this.auditLogService = auditLogService;
     }
 
+    @Transactional(readOnly = true)
     public ExamDto getExam(String tier, String username) {
         DifficultyLevel level = parseTier(tier);
         User user = userRepository.findByUsername(username)
@@ -156,7 +157,7 @@ public class ExamService {
     }
 
     /** Returns per-tier exam status for the authenticated user. */
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ExamStatusDto> getMyExamStatuses(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));

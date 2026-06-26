@@ -18,7 +18,10 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build with Maven (skip tests for speed)
+      - name: Run tests
+        run: mvn test -B -Dtest='!com.typingtutor.service.OtpServiceIntegrationTest'
+
+      - name: Build JAR
         run: mvn package -DskipTests -B
 
       - name: Trigger Render deploy

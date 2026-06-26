@@ -11,6 +11,7 @@ import com.typingtutor.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +39,7 @@ public class PerformanceService {
         this.auditLogService = auditLogService;
     }
 
+    @Transactional
     public PerformanceDto savePerformance(PerformanceRequest request, String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -62,6 +64,7 @@ public class PerformanceService {
         return toDto(performance);
     }
 
+    @Transactional(readOnly = true)
     public List<PerformanceDto> getUserHistory(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));

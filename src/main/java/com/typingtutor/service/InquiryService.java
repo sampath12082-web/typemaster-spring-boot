@@ -33,6 +33,7 @@ public class InquiryService {
         this.auditLogService = auditLogService;
     }
 
+    @Transactional
     public InquiryDto submitInquiry(String username, String subject, String message) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
@@ -45,6 +46,7 @@ public class InquiryService {
         return result;
     }
 
+    @Transactional(readOnly = true)
     public List<InquiryDto> getMyInquiries(String username) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
