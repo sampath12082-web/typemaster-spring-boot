@@ -32,10 +32,10 @@ public class HelpAgentService {
             Accuracy: (correct keystrokes ÷ total keystrokes) × 100%. Each character press is counted.
             Grades: S = 95%+ accuracy & 40+ WPM · A = 90%+ · B = 80%+ · C = below 80%.
 
-            Tiers: BASIC, INTERMEDIATE, ADVANCED. Each has 8 lessons. Lessons unlock in order:
-            - Intermediate unlocks after passing enough Basic lessons (20 WPM, 85% acc per lesson).
-            - Advanced unlocks after passing enough Intermediate lessons (35 WPM, 85% acc per lesson).
-            - Advanced requires 50 WPM and 85% accuracy.
+            Tiers: BASIC, INTERMEDIATE, ADVANCED. Each has 8 lessons.
+            - The first lesson of each tier is always available.
+            - Within a tier, lessons unlock sequentially (pass lesson 1 to unlock lesson 2).
+            - Thresholds: Basic 20 WPM, Intermediate 35 WPM, Advanced 50 WPM — all require 85% accuracy.
 
             Placement test: 60-second test when first signing in. Determines starting tier. Can be skipped (starts at Basic).
             Exams: Timed exam unlocked after passing all 8 lessons in a tier. Cannot be paused. Results in a certificate.
