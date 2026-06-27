@@ -1,5 +1,5 @@
 # Skill Run Report — TypeMaster
-### Last Run: 2026-06-27 | Pending: 13 items
+### Last Run: 2026-06-27 | Pending: 4 items (3 medium + 1 low)
 
 ---
 
@@ -7,35 +7,27 @@
 
 | Skill | Status | Pending |
 |-------|--------|---------|
-| 1. Functionality Review | **6 pending** | FAQ errors, CLAUDE.md test inventory, HelpAgent prompt |
-| 2. App Critique | ~~66.5/100~~ | 5 roadmap items |
+| 1. Functionality Review | ~~All resolved~~ | 0 |
+| 2. App Critique | ~~66.5/100~~ | 5 roadmap items (feature additions) |
 | 3. Doc Writer Audit | ~~All 6 docs pass~~ | 0 |
 | 4. Project Review | **3 pending** | 3 UserService methods need @Transactional |
 | 5. Test Coverage Audit | **1 pending** | AboutPage E2E coverage |
-| 6. Run TypeMaster | ~~142/141 pass~~ | 0 |
+| 6. Run TypeMaster | ~~141/141 pass~~ | 0 |
 
 ---
 
 ## Skill 1: Functionality Review
 
-### ~~Completed~~
+### ~~All Resolved~~ (verified 7/7 pass)
 - ~~ENHANCEMENTS.md: all 16 detail sections match summary table~~
 - ~~E-4 tooltips: 12+ locations implemented, marked Done~~
 - ~~CLAUDE.md: frontend pages table has all 17 pages~~
 - ~~E-2: per-user activity history implemented (backend + frontend)~~
-- ~~All enhancement "Done" items verified in code~~
-- ~~All controller endpoints have matching frontend API calls~~
-- ~~Leaderboard, landing, about, analytics all have routes + code + docs~~
-
-### Pending
-| # | Finding | Severity | Details |
-|---|---------|----------|---------|
-| 1 | FAQ: OTP expiry says "10 minutes" — actual is 30 minutes | High | `HelpPage.jsx:33` says "valid for 10 minutes"; `OtpService.java:25` has `OTP_EXPIRY_MINUTES = 30` |
-| 2 | FAQ: Lesson locking description factually wrong | High | Says "Intermediate unlocks after Basic lessons" — actual: first lesson of every tier is always available, sequential within tier only |
-| 3 | HelpAgentService system prompt: password rule says "8+ characters" | High | `HelpAgentService.java:46` — should say 16-20 characters |
-| 4 | CLAUDE.md: OTP expiry says "15-minute" | Medium | `CLAUDE.md` OtpService description — actual is 30 minutes |
-| 5 | CLAUDE.md: Test inventory missing 7 new test files | Medium | AdminServiceTest, CertificateServiceTest, etc. not listed |
-| 6 | ENHANCEMENTS.md E-5: claims skip is "reversible" | Low | No retake endpoint exists in PlacementController |
+- ~~FAQ: OTP expiry corrected to 30 minutes (was 10)~~
+- ~~FAQ: lesson locking description corrected (sequential within tier)~~
+- ~~HelpAgentService: password rule "16-20 chars" + OTP "30 minutes"~~
+- ~~CLAUDE.md: OTP expiry corrected to 30 minutes, 7 test files added to inventory~~
+- ~~ENHANCEMENTS.md E-5: removed false "reversible" claim~~
 
 ---
 
