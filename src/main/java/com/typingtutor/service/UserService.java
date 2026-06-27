@@ -306,6 +306,7 @@ public class UserService {
         return new ProfileUpdateResult(userRepository.save(user), devOtp, emailChanged, emailWarning);
     }
 
+    @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
@@ -313,10 +314,12 @@ public class UserService {
 
     // Legacy users who were created before the placement system have placementCompleted=false
     // even though they've already done lessons. Treat them as completed if they have any records.
+    @Transactional(readOnly = true)
     public boolean isEffectivePlacementCompleted(User user) {
         return user.isPlacementCompleted() || performanceRepository.existsByUserId(user.getId());
     }
 
+    @Transactional(readOnly = true)
     public UserStatsDto getUserStats(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found: " + username));
