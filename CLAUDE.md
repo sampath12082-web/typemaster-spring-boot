@@ -64,6 +64,13 @@ Tests use Mockito (`@ExtendWith(MockitoExtension.class)`). The Surefire plugin a
 | `service/EmailServiceTest` | Unit | Email sending logic |
 | `security/PasswordCryptoServiceTest` | Unit | RSA-OAEP encrypt/decrypt round-trip, public key export |
 | `security/PasswordPolicyTest` | Unit | Password complexity regex — all missing-char combinations |
+| `service/AdminServiceTest` | Unit | CRUD, FK cascade delete, toggle active, reset password (OTP + temp) |
+| `service/CertificateServiceTest` | Unit | Issue cert, PDF generation, public verify, email notification |
+| `service/PerformanceServiceTest` | Unit | Save performance, locked lesson guard, user history |
+| `service/InquiryServiceTest` | Unit | Submit, reopen (wrong user, not resolved, max reopens) |
+| `service/HelpAgentServiceTest` | Unit | Chat with/without API key, fallback responses |
+| `service/LessonGenerationServiceTest` | Unit | Generate with/without API key, content validation |
+| `service/AuditLogServiceTest` | Unit | Log, exception handling, getMyActivity, getLatest |
 
 ### Build
 
@@ -187,7 +194,7 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 - **`LessonService`** — computes per-user lesson statuses by querying all performance records
 - **`ExamService`** — validates pass/fail against thresholds; on fail, deletes tier's `user_performance` rows; on pass, calls `CertificateService`
 - **`CertificateService`** — generates PDF via PDFBox, stores binary in `certificates.pdf_data`
-- **`OtpService`** — creates 6-digit OTPs with a 15-minute expiry; purpose enum: `VERIFY_EMAIL | FIRST_LOGIN | RESET_PASSWORD`
+- **`OtpService`** — creates 6-digit OTPs with a 30-minute expiry; purpose enum: `VERIFY_EMAIL | FIRST_LOGIN | RESET_PASSWORD`
 - **`LessonGenerationService`** — calls Anthropic API (Claude) if `AI_API_KEY` is set; silently disabled otherwise
 - **`HelpAgentService`** — separate Anthropic-backed support chatbot; calls `https://api.anthropic.com/v1/messages` directly via `java.net.http.HttpClient` with a fixed product-knowledge system prompt, returns `{ answer, escalate }`
 - **`AuditLogService`** — logs user and admin actions to `audit_log` table; user activity retrievable via `GET /api/auth/my-activity`

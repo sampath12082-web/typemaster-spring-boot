@@ -184,7 +184,7 @@ char range below; the current `PasswordPolicy` (backend `security/PasswordPolicy
 **Frontend scope (✅ complete):**
 - Add a "Skip placement test" link/button below the start button
 - On click: call `POST /api/placement/skip`, update AuthContext (`placementCompleted: true`), redirect to `/dashboard`
-- No confirmation needed — the skip endpoint is reversible (user can request another placement via profile settings)
+- No confirmation needed — skip is a one-time action (no retake endpoint exists)
 
 **Completed:** Frontend skip button in PlacementPage calls `/api/placement/skip`.
 

@@ -42,8 +42,8 @@ public class HelpAgentService {
             Certificates: Earned by passing a tier exam. Downloadable as PDF, shareable via link.
             AI lessons: Unlocked after completing all standard Advanced lessons. Personalised to your weak areas.
 
-            Email verification: 6-digit OTP sent to email, valid 10 minutes. Resend link available on verification page.
-            Password reset: Forgot Password → email OTP → set new password. Password needs 8+ characters, uppercase, lowercase, digit, special char.
+            Email verification: 6-digit OTP sent to email, valid 30 minutes. Resend link available on verification page.
+            Password reset: Forgot Password → email OTP → set new password. Password must be 16-20 characters with uppercase, lowercase, digit, and special character (@$!%*?&).
             Account settings: Update email, full name, date of birth, student/professional status from Profile page.
 
             Support tickets: Submit on the Help page (subject + message). Admin responds within 24 hours for escalated issues.
