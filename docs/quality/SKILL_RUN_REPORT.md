@@ -18,7 +18,7 @@
 
 ## Skill 1: Functionality Review
 
-### ~~All Resolved~~ (verified 7/7 pass)
+### ~~All Resolved~~ (deep re-run verified)
 - ~~ENHANCEMENTS.md: all 16 detail sections match summary table~~
 - ~~E-4 tooltips: 12+ locations implemented, marked Done~~
 - ~~CLAUDE.md: frontend pages table has all 17 pages~~
@@ -28,6 +28,10 @@
 - ~~HelpAgentService: password rule "16-20 chars" + OTP "30 minutes"~~
 - ~~CLAUDE.md: OTP expiry corrected to 30 minutes, 7 test files added to inventory~~
 - ~~ENHANCEMENTS.md E-5: removed false "reversible" claim~~
+- ~~FAQ: AI lesson "Generate Next Lesson on dashboard" false reference removed~~
+- ~~FAQ: reopen reason "optional" → required (matches code validation)~~
+- ~~FAQ: exam details — added 3-attempt limit and tier reset info~~
+- ~~HelpAgentService: cross-tier lesson gating claim corrected to within-tier~~
 
 ---
 
