@@ -1,5 +1,5 @@
 # Skill Run Report — TypeMaster
-### Last Run: 2026-06-27 | Pending: 0 items
+### Last Run: 2026-06-27 (deep re-run) | Pending: 0 items
 
 ---
 
@@ -8,7 +8,7 @@
 | Skill | Status | Pending |
 |-------|--------|---------|
 | 1. Functionality Review | ~~All resolved~~ | 0 |
-| 2. App Critique | ~~66.5/100~~ | 5 roadmap items (feature additions) |
+| 2. App Critique | ~~65.5/100~~ | 5 roadmap items (feature additions) |
 | 3. Doc Writer Audit | ~~All 6 docs pass~~ | 0 |
 | 4. Project Review | ~~All resolved~~ | 0 |
 | 5. Test Coverage Audit | ~~All resolved~~ | 0 |
@@ -31,7 +31,7 @@
 
 ---
 
-## Skill 2: App Critique — ~~66.5/100~~
+## Skill 2: App Critique — ~~65.5/100~~
 
 | Category | Wt | Score | Weighted |
 |----------|-----|-------|----------|
