@@ -1,0 +1,187 @@
+# Skill Run Report — TypeMaster
+### Last Run: 2026-06-27 | Pending: 13 items
+
+---
+
+## Executive Summary
+
+| Skill | Status | Pending |
+|-------|--------|---------|
+| 1. Functionality Review | **6 pending** | FAQ errors, CLAUDE.md test inventory, HelpAgent prompt |
+| 2. App Critique | ~~66.5/100~~ | 5 roadmap items |
+| 3. Doc Writer Audit | ~~All 6 docs pass~~ | 0 |
+| 4. Project Review | **3 pending** | 3 UserService methods need @Transactional |
+| 5. Test Coverage Audit | **1 pending** | AboutPage E2E coverage |
+| 6. Run TypeMaster | ~~142/141 pass~~ | 0 |
+
+---
+
+## Skill 1: Functionality Review
+
+### ~~Completed~~
+- ~~ENHANCEMENTS.md: all 16 detail sections match summary table~~
+- ~~E-4 tooltips: 12+ locations implemented, marked Done~~
+- ~~CLAUDE.md: frontend pages table has all 17 pages~~
+- ~~E-2: per-user activity history implemented (backend + frontend)~~
+- ~~All enhancement "Done" items verified in code~~
+- ~~All controller endpoints have matching frontend API calls~~
+- ~~Leaderboard, landing, about, analytics all have routes + code + docs~~
+
+### Pending
+| # | Finding | Severity | Details |
+|---|---------|----------|---------|
+| 1 | FAQ: OTP expiry says "10 minutes" — actual is 30 minutes | High | `HelpPage.jsx:33` says "valid for 10 minutes"; `OtpService.java:25` has `OTP_EXPIRY_MINUTES = 30` |
+| 2 | FAQ: Lesson locking description factually wrong | High | Says "Intermediate unlocks after Basic lessons" — actual: first lesson of every tier is always available, sequential within tier only |
+| 3 | HelpAgentService system prompt: password rule says "8+ characters" | High | `HelpAgentService.java:46` — should say 16-20 characters |
+| 4 | CLAUDE.md: OTP expiry says "15-minute" | Medium | `CLAUDE.md` OtpService description — actual is 30 minutes |
+| 5 | CLAUDE.md: Test inventory missing 7 new test files | Medium | AdminServiceTest, CertificateServiceTest, etc. not listed |
+| 6 | ENHANCEMENTS.md E-5: claims skip is "reversible" | Low | No retake endpoint exists in PlacementController |
+
+---
+
+## Skill 2: App Critique — ~~66.5/100~~
+
+| Category | Wt | Score | Weighted |
+|----------|-----|-------|----------|
+| ~~Core Functionality~~ | 15 | 7 | 10.5 |
+| ~~Curriculum~~ | 15 | 7 | 10.5 |
+| ~~UX / Dark Mode~~ | 10 | 7 | 7.0 |
+| ~~Security~~ | 10 | 8 | 8.0 |
+| ~~Analytics~~ | 10 | 6 | 6.0 |
+| ~~Certification~~ | 5 | 7 | 3.5 |
+| ~~AI Features~~ | 10 | 7 | 7.0 |
+| Performance | 5 | 3 | 1.5 |
+| ~~Mobile~~ | 5 | 4 | 2.0 |
+| ~~Production Readiness~~ | 15 | 7 | 10.5 |
+
+### Pending (roadmap to raise score)
+| # | Item | Impact | Effort |
+|---|------|--------|--------|
+| 7 | Add @Cacheable (Redis) for leaderboard, lessons, placement | Perf 3→6 | Medium |
+| 8 | Add rate limiting on login/OTP endpoints | Prod 7→8 | Small |
+| 9 | Add Swagger/OpenAPI docs | Prod 7→8 | Small |
+| 10 | Per-key error heatmap | Analytics 6→8 | Medium |
+| 11 | Customizable test modes (timed, word count, quotes) | Core 7→9 | Medium |
+
+---
+
+## Skill 3: Doc Writer Audit — ~~ALL PASS~~
+
+| Doc | Status |
+|-----|--------|
+| ~~CLAUDE.md~~ | ~~No H2 refs, endpoints documented, pages table complete~~ |
+| ~~ENHANCEMENTS.md~~ | ~~All 16 detail headers match summary~~ |
+| ~~BUGS.md~~ | ~~B-8 consistently Deferred~~ |
+| ~~HLD.md~~ | ~~PostgreSQL throughout, login flow updated~~ |
+| ~~LLD.md~~ | ~~All routes + endpoints listed~~ |
+| ~~CODING_STANDARDS.md~~ | ~~Dark mode, password policy, test baseline documented~~ |
+
+---
+
+## Skill 4: Project Review
+
+### ~~Completed~~
+- ~~AuditLogService.log() has @Transactional~~
+- ~~LessonService 3 read methods have @Transactional(readOnly=true)~~
+- ~~AuthController.me() refactored to UserProfileDto~~
+- ~~AdminController uses AuditLogService~~
+- ~~ddl-auto=validate in prod~~
+- ~~ErrorBoundary console.error gated by DEV~~
+- ~~No System.out.println, no console.log~~
+- ~~Dark mode on LessonCard, Tooltip, ErrorBoundary~~
+
+### Pending
+| # | Finding | Severity | Details |
+|---|---------|----------|---------|
+| 12 | `UserService.getUserByUsername()` needs `@Transactional(readOnly=true)` | Medium | Read method without annotation |
+| 13 | `UserService.isEffectivePlacementCompleted()` needs `@Transactional(readOnly=true)` | Medium | Read method without annotation |
+| 14 | `UserService.getUserStats(String)` needs `@Transactional(readOnly=true)` | Medium | String overload lacks it |
+
+---
+
+## Skill 5: Test Coverage Audit
+
+### ~~Completed~~
+- ~~Backend: 142 tests across 22 files~~
+- ~~Service coverage: 13/13 (100%)~~
+- ~~E2E: 178 tests across 19 files~~
+- ~~Page coverage: 16/17 (94%)~~
+
+### Pending
+| # | Finding | Severity | Details |
+|---|---------|----------|---------|
+| 15 | `AboutPage` has zero E2E coverage | Low | Static info page |
+
+### Test Inventory
+
+| Backend (142 total) | Tests | E2E (178 total) | Tests |
+|---------------------|-------|------------------|-------|
+| AdminServiceTest | 16 | 07-admin | 19 |
+| PasswordPolicyTest | 13 | 01-auth | 16 |
+| CertificateServiceTest | 12 | 02-dashboard | 16 |
+| LessonGenerationServiceTest | 9 | 03-lesson | 14 |
+| InquiryServiceTest | 9 | 08-exam | 13 |
+| UserServiceLoginTest | 8 | 15-change-password | 13 |
+| HelpAgentServiceTest | 8 | 05-help | 11 |
+| PerformanceServiceTest | 8 | 19-landing | 10 |
+| AuditLogServiceTest | 7 | 04-profile | 9 |
+| OtpServiceTest | 7 | 06-certificates | 9 |
+| EmailServiceTest | 6 | 10-otp | 8 |
+| UserServiceUpdatePasswordTest | 6 | 12-analytics | 8 |
+| JwtAuthFilterEmailTest | 5 | 09-regression | 8 |
+| ExamServiceTest | 5 | 17-leaderboard | 8 |
+| UpdatePasswordRequestValidationTest | 5 | 16-stats-fixes | 6 |
+| LessonServiceTest | 4 | 11-placement | 4 |
+| PlacementServiceTest | 4 | 18-certificate-verify | 4 |
+| RegisterRequestValidationTest | 3 | 13-registration | 1 |
+| JwtStartupValidatorTest | 3 | 14-placement | 1 |
+| PasswordCryptoServiceTest | 2 | | |
+| JwtAuthFilterTest | 1 | | |
+| OtpServiceIntegrationTest | 1 | | |
+
+---
+
+## Skill 6: Run TypeMaster — ~~PASS~~
+
+- ~~Build: SUCCESS~~
+- ~~Tests: 141/141 pass~~
+- ~~No compilation errors~~
+
+---
+
+## All Pending Items Summary
+
+### Must Fix (High)
+| # | Skill | Item |
+|---|-------|------|
+| 1 | 1 | Fix FAQ: OTP expiry "10 minutes" → "30 minutes" |
+| 2 | 1 | Fix FAQ: lesson locking description (sequential within tier, not cross-tier) |
+| 3 | 1 | Fix HelpAgentService system prompt: password "8+" → "16-20" |
+
+### Should Fix (Medium)
+| # | Skill | Item |
+|---|-------|------|
+| 4 | 1 | CLAUDE.md: OTP expiry "15-minute" → "30 minutes" |
+| 5 | 1 | CLAUDE.md: Add 7 new test files to test inventory |
+| 12 | 4 | UserService.getUserByUsername() needs @Transactional(readOnly=true) |
+| 13 | 4 | UserService.isEffectivePlacementCompleted() needs @Transactional(readOnly=true) |
+| 14 | 4 | UserService.getUserStats(String) needs @Transactional(readOnly=true) |
+
+### Nice to Have (Low)
+| # | Skill | Item |
+|---|-------|------|
+| 6 | 1 | ENHANCEMENTS.md E-5: remove "reversible" claim |
+| 15 | 5 | AboutPage E2E smoke test |
+
+### Future Roadmap (from Critique)
+| # | Item | Impact | Effort |
+|---|------|--------|--------|
+| 7 | Add @Cacheable (Redis) | Perf 3→6 | Medium |
+| 8 | Rate limiting | Prod 7→8 | Small |
+| 9 | Swagger/OpenAPI | Prod 7→8 | Small |
+| 10 | Per-key error heatmap | Analytics 6→8 | Medium |
+| 11 | Custom test modes | Core 7→9 | Medium |
+
+---
+
+_Report maintained by Claude Code skill system. ~~Strikethrough~~ = completed. Only pending items remain actionable._
