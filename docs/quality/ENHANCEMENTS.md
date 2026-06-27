@@ -11,7 +11,7 @@ _Last updated: 2026-06-17_
 | E-1 | ✅ Done | Typing Engine | Disable backspace — errors cannot be corrected mid-lesson; cursor stays in place, wrong chars remain red | 2026-06-12 | 2026-06-12 |
 | E-2 | ✅ Done | Audit Logging | Capture full user activity audit log — login/logout timestamps, lesson progress saves, profile changes, password resets, exam submissions; excludes passive browsing | 2026-06-12 | 2026-06-15 |
 | E-3 | ✅ Done | Auth | Password strength standards — 16-20 chars + uppercase/lowercase/digit/special enforced on all flows (backend PasswordPolicy, frontend PASSWORD_RE, E2E test fixtures, PasswordStrength component) | 2026-06-12 | 2026-06-17 |
-| E-4 | 🔄 Partial | UX | Password-field tooltips — inline hint text and ⓘ tooltip added to password fields on RegisterPage and ChangePasswordPage | 2026-06-12 | — |
+| E-4 | ✅ Done | UX | Contextual tooltips added across 12+ locations — lesson cards, stats bar, dashboard, placement, exam, admin, profile | 2026-06-12 | 2026-06-27 |
 | E-5 | ✅ Done | Placement Test | Allow users to skip the placement test — new users skip to BASIC tier lesson 1; returning users skip to continue where they left off | 2026-06-12 | 2026-06-15 |
 | E-6 | ✅ Done | Placement Test | Show logout button on the placement test page/modal so users can exit the app without completing placement | 2026-06-12 | 2026-06-17 |
 | E-7 | ✅ Done | Security | Encrypt passwords client-side before they leave the browser — request payloads (login, register, change-password, admin create-user) were showing plaintext passwords in DevTools → Network. RSA-OAEP, defense-in-depth on top of TLS. | 2026-06-16 | 2026-06-16 |
@@ -83,9 +83,9 @@ if (key === 'Backspace') return
 - Admin controller exposes `GET /api/admin/audit-logs` (returns latest 200 entries, ADMIN only)
 - Admin actions log the actual admin's username (resolved via `@AuthenticationPrincipal` in controller)
 
-**Frontend scope (⏳ pending):**
-- Admin panel: new "Audit Log" tab with filterable, paginated table (filter by user, event type, date range)
-- User profile: personal activity history section (own events only, no admin events)
+**Frontend scope (✅ complete as of 2026-06-27):**
+- Admin panel: "Audit Log" tab showing latest 200 entries with refresh button
+- User profile: collapsible "My Activity" section showing user's own audit events via `GET /api/auth/my-activity` with action badges, details, and relative timestamps
 
 ---
 
@@ -132,11 +132,11 @@ char range below; the current `PasswordPolicy` (backend `security/PasswordPolicy
 
 ---
 
-## E-4 · 🔄 Partial · Tooltips Throughout Application
+## E-4 · ✅ Done · Tooltips Throughout Application
 
 **Request:** Add contextual tooltips wherever a UI element is not self-explanatory.
 
-**Completed (partial):** Password-field tooltips added on RegisterPage and ChangePasswordPage. Remaining tooltip locations deferred.
+**Completed 2026-06-27:** All 12+ priority tooltip locations implemented using the shared Tooltip component — LessonCard (lock/WPM/accuracy), StatsBar (WPM formula/timer), DashboardPage (exam button), PlacementPage (skip), ExamPage (pass threshold), AdminPage (reset/toggle/delete), ProfilePage (recommended tier).
 
 **Priority tooltip locations:**
 

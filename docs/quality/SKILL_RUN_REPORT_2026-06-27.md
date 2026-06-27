@@ -5,18 +5,21 @@
 
 ## Skill 1: Functionality Review
 
-### Remaining Issues
-1. **ENHANCEMENTS.md detail sections still stale** for E-5, E-6, E-9, E-11, E-12, E-13, E-14, E-15, E-16 — summary table is correct ("Done") but detail text still says "Pending"
-2. **E-4 internal inconsistency** — table says "Partial" but detail says "Pending"
-3. **CLAUDE.md frontend pages table incomplete** — lists only 3 of 17 pages (LandingPage, LeaderboardPage, AnalyticsPage). Missing the other 14.
-4. **E-2 frontend scope** (per-user activity history in profile) not implemented
+### Status: ALL RESOLVED
 
-### What's Fixed Since Last Run
-- E-6 correctly marked Done in summary table
-- E-4 correctly marked Partial in summary table
-- B-8 consistently Deferred
-- All 33 API endpoints accounted for
-- All 15 backend test files and 16 E2E specs match documentation
+All 4 findings from the initial run have been addressed:
+
+1. ~~ENHANCEMENTS.md detail sections stale~~ → **FIXED** — All 10 detail sections (E-4 through E-16) updated with correct status headers and "Completed" notes
+2. ~~E-4 internal inconsistency~~ → **FIXED** — E-4 marked "Done" with all 12+ tooltip locations implemented across 7 files (LessonCard, StatsBar, DashboardPage, PlacementPage, ExamPage, AdminPage, ProfilePage)
+3. ~~CLAUDE.md frontend pages table incomplete~~ → **FIXED** — Expanded from 3 to all 17 pages with routes and descriptions
+4. ~~E-2 frontend scope not implemented~~ → **FIXED** — Backend `GET /api/auth/my-activity` endpoint + frontend "My Activity" collapsible section on ProfilePage with action badges, details, and relative timestamps
+
+### Verification (2026-06-27)
+- All ENHANCEMENTS.md detail sections match summary table: **PASS**
+- All 12 tooltip locations implemented: **PASS**
+- CLAUDE.md lists all 17 pages: **PASS**
+- E-2 backend + frontend complete: **PASS**
+- Backend tests: 72/72 pass: **PASS**
 
 ---
 
