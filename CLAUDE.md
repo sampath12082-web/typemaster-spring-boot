@@ -149,11 +149,25 @@ Dark mode is fully implemented via ThemeContext with localStorage persistence (k
 
 ### Frontend pages
 
-| Route | Page | Description |
-|-------|------|-------------|
-| `/` | `LandingPage` | Marketing/intro page for unauthenticated visitors |
-| `/leaderboard` | `LeaderboardPage` | Public leaderboard showing top typists |
-| `/analytics` | `AnalyticsPage` | Per-user typing analytics and progress charts |
+| Page | Route | Description |
+|------|-------|-------------|
+| `LandingPage` | `/` (unauthenticated) | Public marketing page with hero, features, CTA |
+| `LoginPage` | `/login` | Username/password login |
+| `RegisterPage` | `/register` | New user registration with email |
+| `VerifyEmailPage` | `/verify-email` | OTP email verification |
+| `ChangePasswordPage` | `/change-password` | OTP-based password change (forgot/first-login) |
+| `PlacementPage` | `/placement` | 60-second placement test or skip |
+| `DashboardPage` | `/dashboard` | Main hub — tier sections, lesson cards, stats, quick resume |
+| `LessonPage` | `/lesson/:id` | Typing engine with real-time WPM/accuracy |
+| `ExamPage` | `/exam/:tier` | Timed certification exam |
+| `AnalyticsPage` | `/analytics` | Progress charts, rankings, activity heatmap |
+| `LeaderboardPage` | `/leaderboard` | Global rankings by best WPM |
+| `CertificatesPage` | `/certificates` | Earned certificates with PDF download |
+| `CertificateVerifyPage` | `/verify/:certId` | Public certificate verification |
+| `HelpPage` | `/help` | AI assistant, support tickets, FAQ |
+| `ProfilePage` | `/profile` | User info, email, change password |
+| `AboutPage` | `/about` | App mission and features |
+| `AdminPage` | `/admin` | User/inquiry management, audit logs |
 
 ### Lesson progression model
 

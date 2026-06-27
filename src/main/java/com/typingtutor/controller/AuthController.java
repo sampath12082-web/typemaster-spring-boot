@@ -4,6 +4,7 @@ import com.typingtutor.dto.*;
 import com.typingtutor.entity.User;
 import com.typingtutor.security.PasswordCryptoService;
 import com.typingtutor.security.PasswordPolicy;
+import com.typingtutor.service.AuditLogService;
 import com.typingtutor.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,10 +22,13 @@ public class AuthController {
 
     private final UserService userService;
     private final PasswordCryptoService passwordCryptoService;
+    private final AuditLogService auditLogService;
 
-    public AuthController(UserService userService, PasswordCryptoService passwordCryptoService) {
+    public AuthController(UserService userService, PasswordCryptoService passwordCryptoService,
+                           AuditLogService auditLogService) {
         this.userService = userService;
         this.passwordCryptoService = passwordCryptoService;
+        this.auditLogService = auditLogService;
     }
 
     /** Public key the frontend encrypts passwords with before they ever leave the browser. */
@@ -109,6 +113,22 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> ranking(
             @AuthenticationPrincipal UserDetails userDetails) {
         return ResponseEntity.ok(userService.getRanking(userDetails.getUsername()));
+    }
+
+    @GetMapping("/my-activity")
+    public ResponseEntity<List<Map<String, Object>>> myActivity(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(
+            auditLogService.getMyActivity(userDetails.getUsername()).stream()
+                .map(log -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("action", log.getAction());
+                    m.put("details", log.getDetails());
+                    m.put("createdAt", log.getCreatedAt().toString());
+                    return m;
+                })
+                .toList()
+        );
     }
 
     @GetMapping("/leaderboard")

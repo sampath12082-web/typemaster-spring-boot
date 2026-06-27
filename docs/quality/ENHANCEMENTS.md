@@ -132,9 +132,11 @@ char range below; the current `PasswordPolicy` (backend `security/PasswordPolicy
 
 ---
 
-## E-4 · ⏳ Pending · Tooltips Throughout Application
+## E-4 · 🔄 Partial · Tooltips Throughout Application
 
 **Request:** Add contextual tooltips wherever a UI element is not self-explanatory.
+
+**Completed (partial):** Password-field tooltips added on RegisterPage and ChangePasswordPage. Remaining tooltip locations deferred.
 
 **Priority tooltip locations:**
 
@@ -166,6 +168,8 @@ char range below; the current `PasswordPolicy` (backend `security/PasswordPolicy
 
 **Request:** Users should be able to skip the mandatory placement test. Skipping behaviour differs by user history:
 
+**Completed:** Backend `POST /placement/skip` and frontend skip button in PlacementPage implemented.
+
 | User type | Skip destination |
 |-----------|-----------------|
 | Brand new user (no performance records) | BASIC tier, lesson 1 (first available lesson) |
@@ -184,9 +188,11 @@ char range below; the current `PasswordPolicy` (backend `security/PasswordPolicy
 
 ---
 
-## E-6 · ⏳ Pending · Logout Button on Placement Test Page
+## E-6 · ✅ Done · Logout Button on Placement Test Page
 
 **Request:** The placement test page/modal currently has no way to exit the application. A logout button must be visible so users can leave without completing placement.
+
+**Completed 2026-06-17:** Logout button added to PlacementPage.
 
 **Scope (`frontend/src/pages/PlacementPage.jsx`):**
 - Add a logout button in the top-right corner of the placement page (consistent with Navbar position)
@@ -257,13 +263,15 @@ over trivial formatting differences); lockout/rate-limiting on wrong-answer atte
 
 ---
 
-## E-9 · ⏳ Pending · Admin Reset Password Sends OTP Instead of a Temp Password
+## E-9 · ✅ Done · Admin Reset Password Sends OTP Instead of a Temp Password
 
 **Request:** `AdminService.resetPassword()` currently generates a random temporary password that
 the admin must manually share with the user (see `SECURITY_AUDIT.md` history — temp-password
 exposure was already a flagged concern). Replace this with: admin triggers a reset → an OTP is
 emailed to the user's **registered** address → user completes the existing OTP → change-password
 flow themselves, the same way `RESET_PASSWORD`/`FIRST_LOGIN` OTPs already work.
+
+**Completed 2026-06-17:** Admin reset-password sends OTP to email; falls back to 16-char temp password for no-email users.
 
 **Scope:**
 - `AdminController.resetPassword` / `AdminService.resetPassword()` — instead of generating and
@@ -297,10 +305,12 @@ flow themselves, the same way `RESET_PASSWORD`/`FIRST_LOGIN` OTPs already work.
 
 ---
 
-## E-11 · ⏳ Pending · Help Module Redesign + Issue Numbers
+## E-11 · ✅ Done · Help Module Redesign + Issue Numbers
 
 **Request:** The Help page (`HelpPage.jsx` / `InquiryService`) is cluttered. Segregate content into
 clearer sections and make submitted questions/tickets trackable by number.
+
+**Completed 2026-06-17:** Ticket #ID visible in My Tickets list; form area has distinct 'Open a support ticket' and 'Report a bug' buttons.
 
 **Scope:**
 - Visually separate FAQ/self-serve content from the "ask a question" submission form and from the
@@ -312,10 +322,12 @@ clearer sections and make submitted questions/tickets trackable by number.
 
 ---
 
-## E-12 · ⏳ Pending · Let Users Report a Bug
+## E-12 · ✅ Done · Let Users Report a Bug
 
 **Request:** Add a distinct "Report a bug" entry point, separate from the general help/question
 flow.
+
+**Completed 2026-06-17:** 'Report a bug' button with [BUG] prefix uses existing Inquiry infrastructure.
 
 **Scope:**
 - Likely reuses the existing `Inquiry` infrastructure (`InquiryService`, `inquiry_id` ticket
@@ -326,10 +338,12 @@ flow.
 
 ---
 
-## E-13 · ⏳ Pending · Add an "About" Section
+## E-13 · ✅ Done · Add an "About" Section
 
 **Request:** Add an About section to the app. Content ideas requested — brainstormed options below
 for the user to pick from before implementation:
+
+**Completed 2026-06-17:** AboutPage at /about with mission, feature grid, tech stack, support link. Linked from Navbar.
 
 - **App overview / mission** — what TypeMaster is and why it exists (structured touch-typing
   practice with measurable progress), in 2-3 sentences.
@@ -346,10 +360,12 @@ No decision made yet on which of these to include — needs a follow-up pick bef
 
 ---
 
-## E-14 · ⏳ Pending · Support / OTP Sender Address
+## E-14 · ✅ Done · Support / OTP Sender Address
 
 **Request:** Use `yourtypemaster@gmail.com` for both the OTP-sending mailbox and the support
 contact address shown to users.
+
+**Completed 2026-06-17:** Gmail SMTP (yourtypemaster@gmail.com) standardized across all configs and deploy scripts.
 
 **Scope:**
 - `spring.mail.username` / `MAIL_USERNAME` (and corresponding `MAIL_PASSWORD`/app-password) updated
@@ -362,10 +378,12 @@ contact address shown to users.
 
 ---
 
-## E-15 · ⏳ Pending · Certificates Should Use Full Name, Not Username
+## E-15 · ✅ Done · Certificates Should Use Full Name, Not Username
 
 **Request:** Certificates currently print the account username; they should print the user's full
 name instead.
+
+**Completed 2026-06-17:** CertificateService uses fullName with username fallback in both PDF and email.
 
 **Scope:**
 - `CertificateService`'s PDF generation reads from `User.getFullName()` instead of
@@ -376,10 +394,12 @@ name instead.
 
 ---
 
-## E-16 · ⏳ Pending · Restore Previous Certificate Design
+## E-16 · ⬇️ Deferred · Restore Previous Certificate Design
 
 **Request:** An earlier certificate visual design/style existed but isn't what's currently being
 generated. Review old files and bring the original design back.
+
+**Status:** Overlay code in CertificateService fully wired; blocked on certificate-template.png asset.
 
 **Scope:**
 - Look for a prior certificate template/layout (PDFBox drawing code in `CertificateService`, or

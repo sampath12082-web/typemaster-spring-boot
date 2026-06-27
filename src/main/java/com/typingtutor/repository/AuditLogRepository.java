@@ -12,4 +12,6 @@ public interface AuditLogRepository extends JpaRepository<AuditLog, Long> {
     default List<AuditLog> findLatest(int limit) {
         return findAll(PageRequest.of(0, limit, Sort.by(Sort.Direction.DESC, "createdAt"))).getContent();
     }
+
+    List<AuditLog> findByUsernameOrderByCreatedAtDesc(String username);
 }
