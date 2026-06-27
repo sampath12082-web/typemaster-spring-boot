@@ -181,10 +181,12 @@ char range below; the current `PasswordPolicy` (backend `security/PasswordPolicy
 - Returns `PlacementResultDto` with `recommendedTier=BASIC` and `startLessonId` pointing to first BASIC lesson
 - Emits `PLACEMENT_SKIPPED` audit log entry
 
-**Frontend scope (⏳ pending):**
+**Frontend scope (✅ complete):**
 - Add a "Skip placement test" link/button below the start button
 - On click: call `POST /api/placement/skip`, update AuthContext (`placementCompleted: true`), redirect to `/dashboard`
 - No confirmation needed — the skip endpoint is reversible (user can request another placement via profile settings)
+
+**Completed:** Frontend skip button in PlacementPage calls `/api/placement/skip`.
 
 ---
 
@@ -236,7 +238,7 @@ the real password to authenticate it.
 
 ---
 
-## E-8 · ⏳ Pending · Three Secret Questions for Account Recovery
+## E-8 · ⬇️ Deferred · Three Secret Questions for Account Recovery
 
 **Request:** Add a second-factor-style security control: 3 secret questions set up by the user,
 usable as an alternative path into the forgot-password flow.

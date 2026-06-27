@@ -56,24 +56,18 @@ All 4 findings from the initial run have been addressed:
 
 ## Skill 3: Doc Writer Audit
 
-### Fixed Since Last Audit
-- CLAUDE.md: frontend dir ref correct (../typemaster-ui)
-- CLAUDE.md: UserService, PerformanceService listed
-- CLAUDE.md: dark mode section added
-- CLAUDE.md: LeaderboardPage, LandingPage, AnalyticsPage documented
-- CLAUDE.md: leaderboard endpoint documented
-- BUGS.md: B-8 consistently Deferred
+### Status: ALL RESOLVED (2nd pass, 2026-06-27)
 
-### Still Wrong
-| Doc | Issue |
-|-----|-------|
-| CLAUDE.md | 2 stale H2 references remain (line 116 "H2 reserved word", line 212 "H2 console") |
-| CLAUDE.md | /actuator/health not documented |
-| CLAUDE.md | CORS env var name still has mismatch |
-| ENHANCEMENTS.md | 9 detail sections still say "Pending" despite Done in table |
-| HLD.md | 6+ H2 references (system diagram, tech stack, config, deployment) |
-| LLD.md | H2 refs, missing routes (/leaderboard, /about), stale login flow |
-| CODING_STANDARDS.md | No dark mode conventions, no password policy 16-20, test baseline says 110 not 156 |
+All 21 findings from the doc-writer audit have been addressed:
+
+| Doc | Fixes Applied |
+|-----|--------------|
+| CLAUDE.md | H2 reserved word ref → "reserved word"; stale H2 console bullet deleted; AuditLogService description updated; /actuator/health + /api/auth/my-activity documented |
+| ENHANCEMENTS.md | E-5 frontend scope → complete; E-8 detail header → Deferred; all detail sections now match summary |
+| HLD.md | 5 H2→PostgreSQL fixes (diagram, tech stack, deployment, production target, login flow) |
+| LLD.md | H2 refs fixed; 3 missing routes added; 6 missing API endpoints added; h2.console row deleted |
+| CODING_STANDARDS.md | H2→SQL; dark mode section 2.6 added; password policy documented; test baseline 110→156; tt_theme key added |
+| BUGS.md | B-8 consistently Deferred (no change needed — already correct) |
 
 ---
 

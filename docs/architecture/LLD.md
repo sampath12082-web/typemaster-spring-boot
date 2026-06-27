@@ -11,7 +11,7 @@ _Version: 1.0 | Last updated: 2026-06-12_
 app_users (
   id                    BIGINT PRIMARY KEY AUTO_INCREMENT,
   username              VARCHAR UNIQUE NOT NULL,
-  user_password         VARCHAR NOT NULL,           -- BCrypt hash; renamed to avoid H2 reserved word
+  user_password         VARCHAR NOT NULL,           -- BCrypt hash; renamed to avoid reserved word conflict
   role                  VARCHAR NOT NULL,            -- 'USER' | 'ADMIN'
   email                 VARCHAR UNIQUE,
   full_name             VARCHAR,
@@ -254,7 +254,10 @@ For each lesson (ordered by displayOrder):
 /exam/:tier     ProtectedRoute  ExamPage
 /certificates   ProtectedRoute  CertificatesPage
 /profile        ProtectedRoute  ProfilePage
+/leaderboard    ProtectedRoute  LeaderboardPage
+/about          (open)          AboutPage
 /admin          AdminRoute      AdminPage
+/ (unauth)      —               LandingPage
 ```
 
 ### 4.2 Route Guard Logic
@@ -377,6 +380,10 @@ adminApi       → /api/admin/*
 | POST | `/api/auth/forgot-password` | — | `{email}` | `{message}` |
 | GET | `/api/auth/me` | JWT | — | Full user profile object |
 | PUT | `/api/auth/me` | JWT | Profile fields | Updated profile |
+| PUT | `/api/auth/me/password` | JWT | `{currentPassword, newPassword}` | `{message}` |
+| GET | `/api/auth/my-activity` | JWT | — | User activity/stats |
+| GET | `/api/auth/leaderboard` | JWT | — | Leaderboard rankings |
+| GET | `/api/auth/public-key` | — | — | RSA public key for password encryption |
 
 ### Lessons
 | Method | Path | Auth | Response |
@@ -396,6 +403,7 @@ adminApi       → /api/admin/*
 |--------|------|------|---------|
 | GET | `/api/placement/test` | JWT | `{passage, timeLimitSeconds}` |
 | POST | `/api/placement/submit` | JWT | `{wpm, accuracy}` → `{recommendedTier, startLessonId, wpm, accuracy}` |
+| POST | `/api/placement/skip` | JWT | — | Skip placement test |
 
 ### Exams & Certificates
 | Method | Path | Auth | Response |
@@ -423,6 +431,7 @@ adminApi       → /api/admin/*
 | PATCH | `/api/admin/users/{id}/toggle-active` | ADMIN | `{active: bool}` |
 | GET | `/api/admin/inquiries` | ADMIN | All inquiries |
 | POST | `/api/admin/inquiries/{id}/resolve` | ADMIN | `{response}` → Resolved inquiry |
+| GET | `/api/admin/audit-logs` | ADMIN | Audit log entries |
 
 ---
 
@@ -487,8 +496,7 @@ AdminPage        Backend
 | `server.port` | 8080 | API server port |
 | `app.jwt.secret` | *(must be env var)* | JWT signing secret |
 | `app.jwt.expiration-ms` | 86400000 (24h) | JWT lifetime |
-| `spring.datasource.url` | `jdbc:h2:file:./data/typingtutor` | DB location |
-| `spring.h2.console.enabled` | true | H2 web console (dev only) |
+| `spring.datasource.url` | `jdbc:postgresql://localhost:5432/typingtutor` | DB location |
 | `spring.jpa.hibernate.ddl-auto` | update | Auto-schema management |
 | `spring.sql.init.mode` | always | Run data.sql on startup |
 | `app.placement.passage` | *(built-in text)* | Placement test passage |

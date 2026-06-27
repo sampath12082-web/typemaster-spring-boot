@@ -40,7 +40,7 @@ Controller  →  Service  →  Repository  →  Entity
 
 ### 2.4 Entity Design
 - Use Lombok `@Builder` + `@Data` / `@Getter @Setter` — do not write manual getters/setters.
-- Reserved H2 words must be renamed via `@Table(name="...")` / `@Column(name="...")`.
+- Reserved SQL words must be renamed via `@Table(name="...")` / `@Column(name="...")`.
 - Timestamps: use `@CreationTimestamp` rather than `LocalDateTime.now()` in field initialisers — let the DB own the authoritative time.
 - Boolean flags on `User`: `active`, `emailVerified`, `passwordChanged`, `placementCompleted` — all default `false` unless the constructor/builder explicitly sets them.
 
@@ -49,8 +49,12 @@ Controller  →  Service  →  Repository  →  Entity
 - Admin-only paths use both `SecurityConfig` rule (`/api/admin/**`) **and** `@PreAuthorize("hasRole('ADMIN')")` on the method — defence in depth.
 - Sensitive data (passwords, OTPs) must never appear in INFO-level logs.
 - User-controlled strings embedded in HTML must be escaped with `HtmlUtils.htmlEscape()`.
+- Password complexity enforced by `PasswordPolicy` (16-20 characters, uppercase, lowercase, digit, special character `@$!%*?&`).
 
-### 2.6 Logging
+### 2.6 Dark Mode
+- All new pages and components must include `dark:` Tailwind variants. Use `useTheme()` from `ThemeContext` for programmatic access. User preference persisted to `localStorage` key `tt_theme`, defaults to system `prefers-color-scheme`.
+
+### 2.7 Logging
 ```java
 private static final Logger log = LoggerFactory.getLogger(MyClass.class);
 ```
@@ -58,7 +62,7 @@ private static final Logger log = LoggerFactory.getLogger(MyClass.class);
 - Level guidance: `INFO` for auth events, `WARN` for rejected attempts, `ERROR` for unexpected exceptions, `DEBUG` for OTP/token internal details.
 - Production `logging.level.com.typingtutor` must be `INFO`; `DEBUG` is for local development only.
 
-### 2.7 Error Response Shape
+### 2.8 Error Response Shape
 All errors return a single consistent shape:
 ```json
 { "error": "Human-readable message" }
@@ -123,7 +127,7 @@ setCountdown(c => {
 
 ### 3.4 State Management
 - `AuthContext` is the single source of truth for the current user — do not store auth state anywhere else.
-- `localStorage` keys: `tt_token` (JWT string), `tt_user` (JSON serialised user object).
+- `localStorage` keys: `tt_token` (JWT string), `tt_user` (JSON serialised user object), `tt_theme` (dark/light mode preference).
 - `sessionStorage` keys: `tt_email_dismissed` (email reminder dismissal flag).
 - Do not store sensitive data (passwords, OTPs) in any browser storage.
 
@@ -189,7 +193,7 @@ Types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`
 ### 5.2 Target Coverage
 - All critical user flows (register → verify → login → lesson → complete) must have E2E tests.
 - Admin flows (create user, delete user, reset password, resolve inquiry) must have E2E tests.
-- Current baseline: **110/110 Playwright tests passing**.
+- Current baseline: **156+ Playwright tests across 16 spec files**.
 
 ---
 
@@ -214,5 +218,5 @@ VITE_APP_URL=https://typemaster.app   # used for shareable certificate URLs
 Access via `import.meta.env.VITE_APP_URL`. Never use `process.env` in Vite projects.
 
 ### 6.3 Dev vs Production Splits
-- H2 console, `spring.sql.init.mode=always`, debug logging — dev only.
-- Production must use `spring.jpa.hibernate.ddl-auto=validate` and a real DB.
+- `spring.sql.init.mode=always`, debug logging — dev only. H2 is no longer used; PostgreSQL is the only database for both development and production.
+- Production must use `spring.jpa.hibernate.ddl-auto=validate`.

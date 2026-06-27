@@ -24,8 +24,8 @@ TypeMaster is a full-stack typing tutor web application that helps users improve
 └──────────────────────┬──────────────────────────────────┘
                        │ JPA / Hibernate
 ┌──────────────────────▼──────────────────────────────────┐
-│                  H2 File Database                         │
-│          jdbc:h2:file:./data/typingtutor                 │
+│                  PostgreSQL Database                      │
+│      jdbc:postgresql://localhost:5432/typingtutor         │
 │             Persists between server restarts             │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -47,7 +47,7 @@ TypeMaster is a full-stack typing tutor web application that helps users improve
 | Security | Spring Security | 6 | JWT authentication, authorisation |
 | JWT library | jjwt | 0.11+ | Token generation and validation |
 | ORM | Hibernate / JPA | 6.x | Entity mapping, query execution |
-| Database | H2 | 2.x | File-based SQL database (dev/prod) |
+| Database | PostgreSQL | 18 | Relational database (all environments) |
 | Email | Spring Mail | 3.x | OTP delivery via SMTP |
 | AI lessons | External HTTP API | — | AI-generated lesson content |
 | E2E testing | Playwright | latest | Browser automation tests |
@@ -177,7 +177,7 @@ Developer Machine (Windows 11)
 ├── Frontend: npm run dev → Vite on :5173
 │   └── Vite proxy: /api/* → http://localhost:8080
 └── Backend: mvn spring-boot:run → Spring Boot on :8080
-    └── H2 database: ./data/typingtutor.mv.db
+    └── PostgreSQL database: typingtutor (connection via DB_URL env var)
 
 Start scripts: scripts/start-backend.bat, scripts/start-frontend.bat, scripts/start-all.bat
 Stop scripts:  scripts/stop-backend.bat, scripts/stop-frontend.bat
@@ -185,7 +185,7 @@ Stop scripts:  scripts/stop-backend.bat, scripts/stop-frontend.bat
 
 **Production target (planned):**
 - Frontend: Static build (`npm run build`) served via CDN or Nginx
-- Backend: JAR deployed to application server, with production DB (PostgreSQL recommended)
+- Backend: JAR deployed to application server, with production DB (PostgreSQL is the production database)
 - Environment variables: `JWT_SECRET`, `CORS_ALLOWED_ORIGINS`, `MAIL_HOST`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `AI_API_KEY`
 
 ---
@@ -197,7 +197,7 @@ Stop scripts:  scripts/stop-backend.bat, scripts/stop-frontend.bat
 Browser → POST /api/auth/login {username, password}
         → Spring Security authenticates via UserDetailsServiceImpl
         → JWT generated with username + role claim
-        → Frontend stores token, fetches /api/auth/me for full profile
+        → Login response includes emailVerified and placementCompleted — no separate /me call needed (E-10)
         → AuthContext updated, user redirected to /dashboard
 ```
 

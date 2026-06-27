@@ -113,7 +113,7 @@ PostgreSQL everywhere — local dev and production both use it. Connection reads
 
 **Schema tables:** `app_users`, `lessons`, `user_performance`, `email_verification`, `exams`, `exam_attempts`, `certificates`, `inquiries`, `audit_log`
 
-> `user_password` is named that way (not `password`) to avoid an H2 reserved word conflict.
+> `user_password` is named that way (not `password`) to avoid a reserved word conflict.
 
 **Delete cascade order for user deletion:** `certificates` → `exam_attempts` → `user_performance` → `inquiries` → `app_users`
 
@@ -125,6 +125,8 @@ PostgreSQL everywhere — local dev and production both use it. Connection reads
 - No server-side token blacklist; logout is client-side only.
 - Admin endpoints (`/api/admin/**`) require `ROLE_ADMIN` at both the filter chain and `@PreAuthorize`.
 - `GET /api/auth/leaderboard` — public endpoint returning top users ranked by WPM.
+- `GET /api/auth/my-activity` — authenticated user's own audit log entries.
+- `GET /actuator/health` — public health check endpoint (Spring Boot Actuator).
 
 ### Password transport encryption
 
@@ -188,7 +190,7 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 - **`OtpService`** — creates 6-digit OTPs with a 15-minute expiry; purpose enum: `VERIFY_EMAIL | FIRST_LOGIN | RESET_PASSWORD`
 - **`LessonGenerationService`** — calls Anthropic API (Claude) if `AI_API_KEY` is set; silently disabled otherwise
 - **`HelpAgentService`** — separate Anthropic-backed support chatbot; calls `https://api.anthropic.com/v1/messages` directly via `java.net.http.HttpClient` with a fixed product-knowledge system prompt, returns `{ answer, escalate }`
-- **`AuditLogService`** — logs admin actions to `audit_log` table
+- **`AuditLogService`** — logs user and admin actions to `audit_log` table; user activity retrievable via `GET /api/auth/my-activity`
 - **`PlacementService`** — serves the placement passage/time limit and maps WPM to starting tier (`< 20 BASIC`, `20-39 INTERMEDIATE`, `≥ 40 ADVANCED`)
 - **`AdminService`** — admin user CRUD/reset-password; deletes a user's `inquiries`/`certificates`/etc. in FK-safe order (see cascade order above)
 - **`InquiryService`** — support inquiry lifecycle (create, resolve, reopen) backing `InquiryController`
@@ -223,7 +225,7 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 - Commit message format: `<type>: <short imperative summary>` — types: `feat`, `fix`, `refactor`, `docs`, `test`, `chore`.
 - Placement test thresholds: `< 20 WPM → BASIC`, `20–39 → INTERMEDIATE`, `≥ 40 → ADVANCED`.
 - WPM formula: `(charsTyped / 5) / elapsedMinutes`. Accuracy: `(correctKeys / totalKeys) * 100`.
-- The H2 console is gated by `spring.h2.console.enabled`; frame-options are only disabled when that flag is true.
+
 
 ## Further reading
 
