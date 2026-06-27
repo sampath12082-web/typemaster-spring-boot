@@ -1,5 +1,5 @@
 # Skill Run Report — TypeMaster
-### Last Run: 2026-06-27 | Pending: 4 items (3 medium + 1 low)
+### Last Run: 2026-06-27 | Pending: 1 item (low)
 
 ---
 
@@ -10,7 +10,7 @@
 | 1. Functionality Review | ~~All resolved~~ | 0 |
 | 2. App Critique | ~~66.5/100~~ | 5 roadmap items (feature additions) |
 | 3. Doc Writer Audit | ~~All 6 docs pass~~ | 0 |
-| 4. Project Review | **3 pending** | 3 UserService methods need @Transactional |
+| 4. Project Review | ~~All resolved~~ | 0 |
 | 5. Test Coverage Audit | **1 pending** | AboutPage E2E coverage |
 | 6. Run TypeMaster | ~~141/141 pass~~ | 0 |
 
@@ -72,7 +72,7 @@
 
 ## Skill 4: Project Review
 
-### ~~Completed~~
+### ~~All Resolved~~
 - ~~AuditLogService.log() has @Transactional~~
 - ~~LessonService 3 read methods have @Transactional(readOnly=true)~~
 - ~~AuthController.me() refactored to UserProfileDto~~
@@ -81,13 +81,9 @@
 - ~~ErrorBoundary console.error gated by DEV~~
 - ~~No System.out.println, no console.log~~
 - ~~Dark mode on LessonCard, Tooltip, ErrorBoundary~~
-
-### Pending
-| # | Finding | Severity | Details |
-|---|---------|----------|---------|
-| 12 | `UserService.getUserByUsername()` needs `@Transactional(readOnly=true)` | Medium | Read method without annotation |
-| 13 | `UserService.isEffectivePlacementCompleted()` needs `@Transactional(readOnly=true)` | Medium | Read method without annotation |
-| 14 | `UserService.getUserStats(String)` needs `@Transactional(readOnly=true)` | Medium | String overload lacks it |
+- ~~UserService.getUserByUsername() has @Transactional(readOnly=true)~~
+- ~~UserService.isEffectivePlacementCompleted() has @Transactional(readOnly=true)~~
+- ~~UserService.getUserStats(String) has @Transactional(readOnly=true)~~
 
 ---
 
@@ -143,27 +139,27 @@
 
 ## All Pending Items Summary
 
-### Must Fix (High)
-| # | Skill | Item |
-|---|-------|------|
-| 1 | 1 | Fix FAQ: OTP expiry "10 minutes" → "30 minutes" |
-| 2 | 1 | Fix FAQ: lesson locking description (sequential within tier, not cross-tier) |
-| 3 | 1 | Fix HelpAgentService system prompt: password "8+" → "16-20" |
+### ~~Must Fix (High)~~ — ALL DONE
+| # | Skill | Item | Status |
+|---|-------|------|--------|
+| ~~1~~ | ~~1~~ | ~~FAQ: OTP expiry "10 minutes" → "30 minutes"~~ | ~~FIXED~~ |
+| ~~2~~ | ~~1~~ | ~~FAQ: lesson locking description corrected~~ | ~~FIXED~~ |
+| ~~3~~ | ~~1~~ | ~~HelpAgentService prompt: password "8+" → "16-20"~~ | ~~FIXED~~ |
 
-### Should Fix (Medium)
-| # | Skill | Item |
-|---|-------|------|
-| 4 | 1 | CLAUDE.md: OTP expiry "15-minute" → "30 minutes" |
-| 5 | 1 | CLAUDE.md: Add 7 new test files to test inventory |
-| 12 | 4 | UserService.getUserByUsername() needs @Transactional(readOnly=true) |
-| 13 | 4 | UserService.isEffectivePlacementCompleted() needs @Transactional(readOnly=true) |
-| 14 | 4 | UserService.getUserStats(String) needs @Transactional(readOnly=true) |
+### ~~Should Fix (Medium)~~ — ALL DONE
+| # | Skill | Item | Status |
+|---|-------|------|--------|
+| ~~4~~ | ~~1~~ | ~~CLAUDE.md: OTP expiry → 30 minutes~~ | ~~FIXED~~ |
+| ~~5~~ | ~~1~~ | ~~CLAUDE.md: 7 test files added to inventory~~ | ~~FIXED~~ |
+| ~~12~~ | ~~4~~ | ~~UserService.getUserByUsername() @Transactional(readOnly=true)~~ | ~~FIXED~~ |
+| ~~13~~ | ~~4~~ | ~~UserService.isEffectivePlacementCompleted() @Transactional(readOnly=true)~~ | ~~FIXED~~ |
+| ~~14~~ | ~~4~~ | ~~UserService.getUserStats(String) @Transactional(readOnly=true)~~ | ~~FIXED~~ |
 
-### Nice to Have (Low)
-| # | Skill | Item |
-|---|-------|------|
-| 6 | 1 | ENHANCEMENTS.md E-5: remove "reversible" claim |
-| 15 | 5 | AboutPage E2E smoke test |
+### Nice to Have (Low) — 1 remaining
+| # | Skill | Item | Status |
+|---|-------|------|--------|
+| ~~6~~ | ~~1~~ | ~~ENHANCEMENTS.md E-5: "reversible" claim removed~~ | ~~FIXED~~ |
+| 15 | 5 | AboutPage E2E smoke test | PENDING |
 
 ### Future Roadmap (from Critique)
 | # | Item | Impact | Effort |
