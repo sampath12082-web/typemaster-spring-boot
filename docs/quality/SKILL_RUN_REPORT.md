@@ -1,5 +1,5 @@
 # Skill Run Report — TypeMaster
-### Last Run: 2026-06-27 | Pending: 1 item (low)
+### Last Run: 2026-06-27 | Pending: 0 items
 
 ---
 
@@ -11,7 +11,7 @@
 | 2. App Critique | ~~66.5/100~~ | 5 roadmap items (feature additions) |
 | 3. Doc Writer Audit | ~~All 6 docs pass~~ | 0 |
 | 4. Project Review | ~~All resolved~~ | 0 |
-| 5. Test Coverage Audit | **1 pending** | AboutPage E2E coverage |
+| 5. Test Coverage Audit | ~~All resolved~~ | 0 |
 | 6. Run TypeMaster | ~~141/141 pass~~ | 0 |
 
 ---
@@ -155,11 +155,11 @@
 | ~~13~~ | ~~4~~ | ~~UserService.isEffectivePlacementCompleted() @Transactional(readOnly=true)~~ | ~~FIXED~~ |
 | ~~14~~ | ~~4~~ | ~~UserService.getUserStats(String) @Transactional(readOnly=true)~~ | ~~FIXED~~ |
 
-### Nice to Have (Low) — 1 remaining
+### ~~Nice to Have (Low)~~ — ALL DONE
 | # | Skill | Item | Status |
 |---|-------|------|--------|
 | ~~6~~ | ~~1~~ | ~~ENHANCEMENTS.md E-5: "reversible" claim removed~~ | ~~FIXED~~ |
-| 15 | 5 | AboutPage E2E smoke test | PENDING |
+| ~~15~~ | ~~5~~ | ~~AboutPage E2E smoke test (6 tests in 20-about.spec.js)~~ | ~~FIXED~~ |
 
 ### Future Roadmap (from Critique)
 | # | Item | Impact | Effort |
