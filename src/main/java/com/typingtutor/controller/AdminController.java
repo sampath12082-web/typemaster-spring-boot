@@ -5,10 +5,10 @@ import com.typingtutor.dto.AdminUserDto;
 import com.typingtutor.dto.InquiryDto;
 import com.typingtutor.dto.ResolveInquiryRequest;
 import com.typingtutor.entity.AuditLog;
-import com.typingtutor.repository.AuditLogRepository;
 import com.typingtutor.security.PasswordCryptoService;
 import com.typingtutor.security.PasswordPolicy;
 import com.typingtutor.service.AdminService;
+import com.typingtutor.service.AuditLogService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,13 +25,13 @@ import java.util.Map;
 public class AdminController {
 
     private final AdminService adminService;
-    private final AuditLogRepository auditLogRepository;
+    private final AuditLogService auditLogService;
     private final PasswordCryptoService passwordCryptoService;
 
-    public AdminController(AdminService adminService, AuditLogRepository auditLogRepository,
+    public AdminController(AdminService adminService, AuditLogService auditLogService,
                            PasswordCryptoService passwordCryptoService) {
         this.adminService = adminService;
-        this.auditLogRepository = auditLogRepository;
+        this.auditLogService = auditLogService;
         this.passwordCryptoService = passwordCryptoService;
     }
 
@@ -83,6 +83,6 @@ public class AdminController {
 
     @GetMapping("/audit-logs")
     public ResponseEntity<List<AuditLog>> auditLogs() {
-        return ResponseEntity.ok(auditLogRepository.findLatest(200));
+        return ResponseEntity.ok(auditLogService.getLatest(200));
     }
 }

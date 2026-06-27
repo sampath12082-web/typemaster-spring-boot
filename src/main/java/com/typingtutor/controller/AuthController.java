@@ -83,30 +83,30 @@ public class AuthController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<?> me(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserProfileDto> me(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getUserByUsername(userDetails.getUsername());
-        Map<String, Object> resp = new LinkedHashMap<>();
-        resp.put("username",           user.getUsername());
-        resp.put("userId",             user.getId());
-        resp.put("role",               user.getRole().name());
-        resp.put("email",              user.getEmail() != null ? user.getEmail() : "");
-        resp.put("fullName",           user.getFullName() != null ? user.getFullName() : "");
-        resp.put("dateOfBirth",        user.getDateOfBirth() != null ? user.getDateOfBirth().toString() : "");
-        resp.put("student",            user.isStudent());
-        resp.put("schoolName",         user.getSchoolName() != null ? user.getSchoolName() : "");
-        resp.put("classYear",          user.getClassYear() != null ? user.getClassYear() : "");
-        resp.put("courseSpecialization", user.getCourseSpecialization() != null ? user.getCourseSpecialization() : "");
-        resp.put("occupation",         user.getOccupation() != null ? user.getOccupation() : "");
-        resp.put("placementCompleted", userService.isEffectivePlacementCompleted(user));
-        resp.put("recommendedTier",    user.getRecommendedTier() != null ? user.getRecommendedTier() : "");
-        resp.put("emailVerified",               user.isEmailVerified());
-        resp.put("emailVerificationDeadline",   user.getEmailVerificationDeadline() != null
-                ? user.getEmailVerificationDeadline().toString() : null);
         UserStatsDto stats = userService.getUserStats(user);
-        resp.put("averageWpm",        stats.getAverageWpm());
-        resp.put("lessonsCompleted",  stats.getLessonsCompleted());
-        resp.put("totalCompleted",    stats.getTotalCompleted());
-        return ResponseEntity.ok(resp);
+        UserProfileDto dto = new UserProfileDto();
+        dto.setUsername(user.getUsername());
+        dto.setUserId(user.getId());
+        dto.setRole(user.getRole().name());
+        dto.setEmail(user.getEmail() != null ? user.getEmail() : "");
+        dto.setFullName(user.getFullName() != null ? user.getFullName() : "");
+        dto.setDateOfBirth(user.getDateOfBirth() != null ? user.getDateOfBirth().toString() : "");
+        dto.setStudent(user.isStudent());
+        dto.setSchoolName(user.getSchoolName() != null ? user.getSchoolName() : "");
+        dto.setClassYear(user.getClassYear() != null ? user.getClassYear() : "");
+        dto.setCourseSpecialization(user.getCourseSpecialization() != null ? user.getCourseSpecialization() : "");
+        dto.setOccupation(user.getOccupation() != null ? user.getOccupation() : "");
+        dto.setPlacementCompleted(userService.isEffectivePlacementCompleted(user));
+        dto.setRecommendedTier(user.getRecommendedTier() != null ? user.getRecommendedTier() : "");
+        dto.setEmailVerified(user.isEmailVerified());
+        dto.setEmailVerificationDeadline(user.getEmailVerificationDeadline() != null
+                ? user.getEmailVerificationDeadline().toString() : null);
+        dto.setAverageWpm(stats.getAverageWpm());
+        dto.setLessonsCompleted(stats.getLessonsCompleted());
+        dto.setTotalCompleted(stats.getTotalCompleted());
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/ranking")

@@ -10,6 +10,7 @@ import com.typingtutor.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class LessonService {
         this.userRepository = userRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<LessonWithStatusDto> getAllLessonsForUser(String username) {
         Long userId = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found")).getId();
@@ -55,6 +57,7 @@ public class LessonService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public LessonWithStatusDto getLessonById(Long lessonId, String username) {
         Lesson lesson = lessonRepository.findById(lessonId)
                 .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
@@ -74,6 +77,7 @@ public class LessonService {
         return toDto(lesson, perfsByLesson, tierMinOrder, allLessons);
     }
 
+    @Transactional(readOnly = true)
     public String computeLessonStatus(Long userId, Lesson lesson) {
         List<Lesson> allLessons = lessonRepository.findAllByOrderByDifficultyLevelAscDisplayOrderAsc();
         List<UserPerformance> allPerfs = performanceRepository.findRecentByUserIdWithLesson(userId);

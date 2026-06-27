@@ -20,6 +20,7 @@ public class AuditLogService {
         this.auditLogRepository = auditLogRepository;
     }
 
+    @Transactional
     public void log(String username, String action, String details) {
         try {
             auditLogRepository.save(new AuditLog(username, action, details));
@@ -31,5 +32,10 @@ public class AuditLogService {
     @Transactional(readOnly = true)
     public List<AuditLog> getMyActivity(String username) {
         return auditLogRepository.findByUsernameOrderByCreatedAtDesc(username);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuditLog> getLatest(int limit) {
+        return auditLogRepository.findLatest(limit);
     }
 }
