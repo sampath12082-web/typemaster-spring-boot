@@ -98,36 +98,36 @@ All 7 findings fixed:
 
 ## Skill 5: Test Coverage Audit
 
-### Summary
-- **Backend: 73 tests** across 15 files
-- **E2E: 156 tests** across 16 files
-- **Service coverage: 6/13** (46%) have dedicated tests
-- **Page coverage: 14/17** (82%) have E2E coverage
+### Status: ALL RESOLVED (2026-06-27)
 
-### Untested Services (7)
-| Service | Priority |
-|---------|----------|
-| AdminService | HIGH |
-| CertificateService | HIGH |
-| PerformanceService | HIGH |
-| InquiryService | MEDIUM |
-| HelpAgentService | MEDIUM |
-| AuditLogService | MEDIUM |
-| LessonGenerationService | LOW |
+**Before:** 72 backend tests, 156 E2E tests. 7 services untested, 3 pages untested.
+**After:** 141 backend tests, ~178 E2E tests. 13/13 services tested, 17/17 pages tested.
 
-### Untested Pages (3)
-| Page | Priority |
-|------|----------|
-| LeaderboardPage | MEDIUM |
-| CertificateVerifyPage | MEDIUM |
-| LandingPage | LOW |
+| New Backend Test File | Tests | Covers |
+|-----------------------|-------|--------|
+| AdminServiceTest | 16 | CRUD, FK cascade, toggle active, reset password |
+| CertificateServiceTest | 12 | Issue cert, PDF, public verify, email |
+| PerformanceServiceTest | 8 | Save, locked lesson, history |
+| InquiryServiceTest | 9 | Submit, reopen (all error paths) |
+| HelpAgentServiceTest | 8 | Chat with/without API key |
+| LessonGenerationServiceTest | 9 | Generate with/without API key |
+| AuditLogServiceTest | 7 | Log, exception handling, getMyActivity |
+
+| New E2E Spec File | Tests | Covers |
+|--------------------|-------|--------|
+| 17-leaderboard.spec.js | 8 | Table, medals, user highlight |
+| 18-certificate-verify.spec.js | 4 | Public verify, not-found |
+| 19-landing.spec.js | 10 | Hero, CTA, features, dark mode, auth redirect |
+
+**Service coverage: 6/13 (46%) -> 13/13 (100%)**
+**Page coverage: 14/17 (82%) -> 17/17 (100%)**
 
 ---
 
 ## Skill 6: Run TypeMaster
 
 - **Build: SUCCESS**
-- **Tests: 72/72 pass** (OtpServiceIntegrationTest excluded — requires PostgreSQL)
+- **Tests: 141/141 pass** (OtpServiceIntegrationTest excluded — requires PostgreSQL)
 - **No compilation errors**
 
 ---
