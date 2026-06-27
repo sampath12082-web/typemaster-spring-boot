@@ -73,22 +73,26 @@ All 21 findings from the doc-writer audit have been addressed:
 
 ## Skill 4: Project Review
 
-### Still Needs Fixing
-1. **`AuditLogService.log()` missing `@Transactional`** — write without transaction
-2. **`LessonService` — 3 read methods lack `@Transactional(readOnly=true)`** — `getAllLessonsForUser()`, `getLessonById()`, `computeLessonStatus()`
-3. **`AuthController.me()` has 17+ field inline map** — should use DTO
-4. **`AdminController` directly injects `AuditLogRepository`** — bypasses service layer
-5. **4 components still missing dark mode** — LessonCard, PasswordStrength, TypingEngine, Tooltip
-6. **`ddl-auto=update` in production**
-7. **`console.error` in ErrorBoundary.jsx** — acceptable for React error boundary
+### Status: ALL RESOLVED (2026-06-27)
 
-### Improved Since Last Review
-- All write methods now have @Transactional
-- No System.out.println
-- No console.log/console.error in pages
+All 7 findings fixed:
+
+1. ~~AuditLogService.log() missing @Transactional~~ → **FIXED** — @Transactional added
+2. ~~LessonService 3 read methods lack readOnly~~ → **FIXED** — @Transactional(readOnly=true) on getAllLessonsForUser, getLessonById, computeLessonStatus
+3. ~~AuthController.me() inline map~~ → **FIXED** — refactored to UserProfileDto (new class)
+4. ~~AdminController injects AuditLogRepository~~ → **FIXED** — now uses AuditLogService.getLatest()
+5. ~~4 components missing dark mode~~ → **FIXED** — dark: variants added to LessonCard, Tooltip, ErrorBoundary (PasswordStrength/TypingEngine already had dark: from prior pass)
+6. ~~ddl-auto=update in production~~ → **FIXED** — application-prod.properties now sets ddl-auto=validate
+7. ~~console.error in ErrorBoundary~~ → **FIXED** — gated by `import.meta.env.DEV`
+
+### Passed Checks
+- All write methods have @Transactional
+- All read methods have @Transactional(readOnly=true)
+- Controllers are thin — no business logic, no direct repository access
+- No System.out.println, no console.log in production
 - No hardcoded secrets
 - SecurityConfig permitAll paths appropriate
-- Most controllers thin
+- 72/72 backend tests pass
 
 ---
 
