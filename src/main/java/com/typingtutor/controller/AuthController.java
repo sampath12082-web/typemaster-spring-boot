@@ -7,6 +7,7 @@ import com.typingtutor.security.PasswordPolicy;
 import com.typingtutor.service.AuditLogService;
 import com.typingtutor.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -34,7 +36,9 @@ public class AuthController {
     /** Public key the frontend encrypts passwords with before they ever leave the browser. */
     @GetMapping("/public-key")
     public ResponseEntity<Map<String, String>> publicKey() {
-        return ResponseEntity.ok(Map.of("publicKey", passwordCryptoService.getPublicKeyBase64()));
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(Map.of("publicKey", passwordCryptoService.getPublicKeyBase64()));
     }
 
     @PostMapping("/register")
@@ -133,7 +137,9 @@ public class AuthController {
 
     @GetMapping("/leaderboard")
     public ResponseEntity<List<Map<String, Object>>> leaderboard() {
-        return ResponseEntity.ok(userService.getLeaderboard());
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(60, TimeUnit.SECONDS).cachePublic())
+                .body(userService.getLeaderboard());
     }
 
     @PutMapping("/me/password")

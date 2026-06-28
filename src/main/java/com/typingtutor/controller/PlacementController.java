@@ -7,12 +7,14 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/placement")
@@ -26,7 +28,9 @@ public class PlacementController {
 
     @GetMapping("/test")
     public ResponseEntity<Map<String, Object>> getTest() {
-        return ResponseEntity.ok(placementService.getPlacementTest());
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(3600, TimeUnit.SECONDS).cachePublic())
+                .body(placementService.getPlacementTest());
     }
 
     @PostMapping("/submit")
