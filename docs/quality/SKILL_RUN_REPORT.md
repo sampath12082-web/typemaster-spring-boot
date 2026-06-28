@@ -8,7 +8,7 @@
 | Skill | Status | Pending |
 |-------|--------|---------|
 | 1. Functionality Review | ~~All resolved~~ | 0 |
-| 2. App Critique | ~~84.5/100~~ | All roadmap items done |
+| 2. App Critique | **65/100** (deep) | Strict market comparison vs Monkeytype/TypingClub |
 | 3. Doc Writer Audit | ~~All 6 docs pass~~ | 0 |
 | 4. Project Review | ~~All resolved~~ | 0 |
 | 5. Test Coverage Audit | ~~All resolved~~ | 0 |
@@ -35,32 +35,47 @@
 
 ---
 
-## Skill 2: App Critique — ~~84.5/100 (post-roadmap)~~
+## Skill 2: App Critique — Deep Research Score: **65/100**
 
-Previous score: 69/100. After implementing all 5 roadmap items: **84.5/100**.
+Previous quick-pass score: 84.5/100. Deep code-verified research with strict market comparison: **65/100**.
 
-| Category | Wt | Score | Weighted | Key Evidence |
-|----------|-----|-------|----------|-------------|
-| ~~Core Functionality~~ | 15 | 9 | 13.5 | PracticePage with time/word modes |
-| ~~Curriculum~~ | 15 | 9 | 13.5 | 24 lessons, AI generation, placement test |
-| ~~UX / Dark Mode~~ | 10 | 8 | 8.0 | 239 dark: classes across 30 files |
-| ~~Security~~ | 10 | 9 | 9.0 | RSA-OAEP, Bucket4j rate limiting, OTP lockout |
-| ~~Analytics~~ | 10 | 9 | 9.0 | KeyboardHeatmap, charts, leaderboard |
-| ~~Certification~~ | 5 | 10 | 5.0 | PDF + public verify — best in class |
-| ~~AI Features~~ | 10 | 8 | 8.0 | AI lessons + help agent |
-| ~~Performance~~ | 5 | 7 | 3.5 | @Cacheable on placement + leaderboard |
-| ~~Mobile~~ | 5 | 6 | 3.0 | Responsive breakpoints, hamburger nav |
-| ~~Production~~ | 15 | 8 | 12.0 | 326 tests, CI gates, Swagger, rate limiting |
+The deep pass applied harsher scoring against market leaders (Monkeytype's 100+ themes / 200K word pool / <8ms latency, TypingClub's 600+ lessons / finger guides, Ratatype's LinkedIn integration).
+
+| Category | Wt | Score | Weighted | Key Evidence | Market Gap |
+|----------|-----|-------|----------|-------------|-----------|
+| Core Functionality | 15 | 5 | 7.5 | WPM formula, 4 char states, time/word practice | 200-word list vs 200K, no custom text, no sounds, 300ms tick |
+| Curriculum | 15 | 6 | 9.0 | 24 lessons, AI generation, exams, placement | 24 vs 600+ lessons, no finger guide, no adaptive difficulty |
+| UX / Dark Mode | 10 | 6 | 6.0 | 239 dark: classes, toasts, tooltips, ErrorBoundary | 1 theme vs 100+, no sounds, toast dark gap, limited ARIA |
+| Security | 10 | 7.5 | 7.5 | RSA-OAEP, Bucket4j, OTP lockout, password policy | No 2FA, no CSP headers, no token blacklist |
+| Analytics | 10 | 7 | 7.0 | Keyboard heatmap, charts, leaderboard, rankings | No per-test WPM graph, no raw/net WPM, client-side only |
+| Certification | 5 | 8 | 4.0 | PDFBox with template, public verify, email delivery | No LinkedIn button, no QR code, no social sharing |
+| AI Features | 10 | 8 | 8.0 | AI lesson generation + help agent — unique differentiator | No conversation history, no streaming, no cost controls |
+| Performance | 5 | 6 | 3.0 | @Cacheable on 2 zones, React useMemo/useRef, Docker | No Redis, no HTTP cache headers, no code splitting |
+| Mobile | 5 | 6 | 3.0 | Hamburger nav, viewport meta, 42 responsive classes | No PWA, no touch typing mode, inherently desktop |
+| Production | 15 | 7 | 10.5 | 326 tests, CI gates, Swagger, rate limiting, actuator | No Flyway, no structured logging, no error tracking |
 
 ### Top 3 Strengths
-1. **326 tests** (142 backend + 184 E2E) with CI gating deploys
-2. **Defense-in-depth security** — RSA-OAEP, rate limiting, OTP lockout, audit logging
-3. **Rich analytics** — per-key heatmap, charts, leaderboard, AI-generated content
+1. **AI features are a genuine market differentiator** — no competitor has AI lesson generation + AI help agent
+2. **Defense-in-depth security** — RSA-OAEP password transport is uncommon even in enterprise apps
+3. **326 tests with CI gating** — 142 backend + 184 E2E, CI runs tests before every deploy
 
-### Top 3 Remaining Gaps
-1. No Flyway/Liquibase for schema migrations
-2. Mobile typing UX minimal (no PWA, no touch-optimized mode)
-3. Basic caching (ConcurrentMap, no TTL/eviction — needs Redis for multi-instance)
+### Top 3 Remaining Gaps (to reach 80+)
+1. **Core: expand word lists + add custom text mode** — 200 words is thin vs Monkeytype's 200K pool
+2. **Curriculum: more lessons + adaptive difficulty** — 24 lessons vs TypingClub's 600+, no per-key drills
+3. **UX: theme customization + sound effects** — single indigo theme vs 100+ options
+
+### What would push each category higher
+
+| Category | Current | To reach 8+ | Effort |
+|----------|---------|-------------|--------|
+| Core | 5 | Add 1K/5K word lists, custom text paste, sound toggle | Small |
+| Curriculum | 6 | Add 20+ lessons per tier, animated finger guide | Large |
+| UX | 6 | Add 5+ themes, keystroke sounds, skip-nav, aria-live | Medium |
+| Security | 7.5 | Add CSP headers, session timeout warning | Small |
+| Analytics | 7 | Add per-test WPM timeline, raw/net WPM split | Medium |
+| Certification | 8 | Add LinkedIn share button, QR code on PDF | Small |
+| Performance | 6 | Add Caffeine cache with TTL, HTTP cache headers | Small |
+| Production | 7 | Add Flyway migrations, structured JSON logging | Medium |
 
 ### ~~Pending (roadmap to raise score)~~ — ALL DONE
 | # | Item | Impact | Effort |
