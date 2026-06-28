@@ -72,10 +72,10 @@ The deep pass applied harsher scoring against market leaders (Monkeytype's 100+ 
 | Curriculum | 6 | ~~Animated finger guide~~. Still need: more lessons per tier | PARTIAL |
 | ~~UX~~ | 6 | ~~4 accent themes (indigo/emerald/rose/amber), keystroke sounds~~ | ~~DONE~~ |
 | ~~Security~~ | 7.5 | ~~CSP headers, HSTS, session timeout warning~~ | ~~DONE~~ |
-| Analytics | 7 | Still need: per-test WPM timeline, raw/net WPM | PENDING |
+| ~~Analytics~~ | 7 | ~~WPM timeline chart (SVG), raw/net WPM split in results~~ | ~~DONE~~ |
 | ~~Certification~~ | 8 | ~~LinkedIn share button on certs + verify page~~ | ~~DONE~~ |
 | ~~Performance~~ | 6 | ~~HTTP cache headers (placement 1h, leaderboard 60s, public-key no-store)~~ | ~~DONE~~ |
-| Production | 7 | Still need: Flyway migrations, structured JSON logging | PENDING |
+| ~~Production~~ | 7 | ~~Flyway migrations (baseline-on-migrate), structured JSON logging (logback-spring.xml)~~ | ~~DONE~~ |
 
 ### ~~Pending (roadmap to raise score)~~ — ALL DONE
 | # | Item | Impact | Effort |
