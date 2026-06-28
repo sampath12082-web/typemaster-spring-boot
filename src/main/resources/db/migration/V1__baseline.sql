@@ -1,0 +1,5 @@
+-- Baseline migration: schema already exists via Hibernate ddl-auto.
+-- This file marks the baseline for Flyway to track future changes.
+-- All tables (app_users, lessons, user_performance, email_verification,
+-- exams, exam_attempts, certificates, inquiries, audit_log) are
+-- already created by Hibernate on first startup.
