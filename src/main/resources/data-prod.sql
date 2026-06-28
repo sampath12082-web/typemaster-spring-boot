@@ -43,6 +43,36 @@ SELECT * FROM (VALUES
 ) AS v(title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
 WHERE NOT EXISTS (SELECT 1 FROM lessons WHERE difficulty_level = 'ADVANCED');
 
+-- ============================================================
+-- ADDITIONAL LESSONS (4 per tier = 12 new, display_order 25-36)
+-- ============================================================
+INSERT INTO lessons (title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
+SELECT * FROM (VALUES
+  ('Number Row Basics',     'BASIC', 'Type these numbers carefully: 1 2 3 4 5 6 7 8 9 0. Now try in pairs: 12 34 56 78 90. Phone numbers: 555-1234, 800-555-9876. Zip codes: 10001, 90210, 60601, 30301. Years: 2024, 2025, 2026. Addresses: 42 Oak Street, 123 Main Avenue, 7890 Pine Road. Scores: 95 out of 100, 87 percent, 3.14 ratio.',                                                              25, 20, 85.0),
+  ('Common Punctuation',    'BASIC', 'Hello, how are you? I am fine! Great. Let me know if you need anything. Is this correct? Yes, it is. No, wait -- I changed my mind. "Thank you," she said. He replied, "You are welcome!" What time is it? It is 3:30 p.m. already. Wow! That was fast. Can you believe it? I cannot. Well, let us try again.',                                                                 26, 20, 85.0),
+  ('Capital Letters',       'BASIC', 'Monday Tuesday Wednesday Thursday Friday Saturday Sunday. January February March April May June July August September October November December. New York Los Angeles Chicago Houston Phoenix Philadelphia San Antonio San Diego Dallas. The United States of America. The United Kingdom. The European Union.',                                                               27, 20, 85.0),
+  ('Speed Building',        'BASIC', 'the and is to it of in was for that you he on are with as at be this have from or one had but not what all were when we there can an your which their said if do will each about how up out them then she many some so these would other into has her two like him see time could no make first been its who now people my made over did down only way find use may water long little very after words called just where most know get through back much before also around another came come work three word must because does part even place well such here take why things help put years different away again off went old number great tell men say small every found still between name should home big give air line set own under read last never us left end along while might next sound below saw something thought both few those always looked show large often together asked house',  28, 20, 85.0)
+) AS v(title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
+WHERE NOT EXISTS (SELECT 1 FROM lessons WHERE display_order = 25);
+
+INSERT INTO lessons (title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
+SELECT * FROM (VALUES
+  ('Email Writing',         'INTERMEDIATE', 'Dear Mr. Johnson, I am writing to follow up on our meeting last Thursday. Please find attached the quarterly report for Q3 2026. The revenue figures show a 12% increase compared to the previous quarter. Could we schedule a call for next Tuesday at 2:30 PM EST? Let me know if that works for your schedule. Best regards, Sarah Chen, Senior Analyst, Global Markets Division.',                     29, 35, 85.0),
+  ('Technical Terms',       'INTERMEDIATE', 'The application server runs on port 8080 and connects to a PostgreSQL database via JDBC. Authentication uses JSON Web Tokens with RSA-OAEP encryption for password transport. The frontend is built with React 18 and uses Tailwind CSS for styling. API documentation is available at /swagger-ui.html. Rate limiting protects sensitive endpoints using the token-bucket algorithm.',                    30, 35, 85.0),
+  ('Mixed Punctuation',     'INTERMEDIATE', 'The results were clear: option (a) increased throughput by 40%; option (b) reduced latency from 200ms to 50ms; and option (c) -- the recommended approach -- combined both improvements. "We should deploy option (c) by Friday," said the lead engineer. The team agreed [unanimously] and filed ticket #4521. Cost estimate: $12,500/month for infrastructure.',                                     31, 35, 85.0),
+  ('Paragraph Flow',        'INTERMEDIATE', 'Effective communication is the foundation of every successful team. When team members share information clearly and promptly, projects move forward without unnecessary delays or costly misunderstandings. Good communicators listen actively before responding, ask clarifying questions when requirements seem ambiguous, and provide constructive feedback that helps everyone grow professionally.',      32, 35, 85.0)
+) AS v(title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
+WHERE NOT EXISTS (SELECT 1 FROM lessons WHERE display_order = 29);
+
+INSERT INTO lessons (title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
+SELECT * FROM (VALUES
+  ('Python Code Snippets',  'ADVANCED', 'def fibonacci(n: int) -> list[int]: result = [0, 1] for i in range(2, n): result.append(result[i-1] + result[i-2]) return result[:n] class DataProcessor: def __init__(self, config: dict): self.config = config self._cache = {} def process(self, data: list) -> dict: return {k: sum(v) / len(v) for k, v in self._group(data).items()}',                                        33, 50, 85.0),
+  ('SQL Queries',           'ADVANCED', 'SELECT u.username, COUNT(p.id) AS total_runs, ROUND(AVG(p.wpm), 1) AS avg_wpm FROM app_users u LEFT JOIN user_performance p ON u.id = p.user_id WHERE u.role = ''USER'' AND p.completed_at >= NOW() - INTERVAL ''30 days'' GROUP BY u.username HAVING COUNT(p.id) >= 5 ORDER BY avg_wpm DESC LIMIT 20;',                                                                      34, 50, 85.0),
+  ('JSON & API Data',       'ADVANCED', '{"user": {"id": 42, "name": "Alice Chen", "email": "alice@example.com"}, "settings": {"theme": "dark", "fontSize": "lg", "notifications": true}, "stats": {"averageWpm": 67.3, "lessonsCompleted": 18, "totalRuns": 45, "bestWpm": 82, "percentile": 91}, "certificates": [{"tier": "BASIC", "issuedAt": "2026-01-15"}, {"tier": "INTERMEDIATE", "issuedAt": "2026-03-22"}]}', 35, 50, 85.0),
+  ('Shell Commands',        'ADVANCED', 'git log --oneline -20 | grep "feat:" && echo "Features found" || echo "None" cd ~/projects/typemaster && npm run build 2>&1 | tee build.log docker compose up -d --build && docker ps --format "{{.Names}}: {{.Status}}" curl -s https://api.example.com/health | python3 -c "import json,sys; print(json.load(sys.stdin)[''status''])" find . -name "*.java" -exec grep -l "TODO" {} +', 36, 50, 85.0)
+) AS v(title, difficulty_level, content_text, display_order, min_wpm, min_accuracy)
+WHERE NOT EXISTS (SELECT 1 FROM lessons WHERE display_order = 33);
+
 -- Fix min_wpm for existing lessons seeded with wrong default
 UPDATE lessons SET min_wpm = 35 WHERE difficulty_level = 'INTERMEDIATE' AND min_wpm = 20;
 UPDATE lessons SET min_wpm = 50 WHERE difficulty_level = 'ADVANCED'     AND min_wpm = 20 AND is_ai_generated = FALSE;
