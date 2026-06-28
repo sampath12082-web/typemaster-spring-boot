@@ -66,16 +66,16 @@ The deep pass applied harsher scoring against market leaders (Monkeytype's 100+ 
 
 ### What would push each category higher
 
-| Category | Current | To reach 8+ | Effort |
-|----------|---------|-------------|--------|
-| Core | 5 | Add 1K/5K word lists, custom text paste, sound toggle | Small |
-| Curriculum | 6 | Add 20+ lessons per tier, animated finger guide | Large |
-| UX | 6 | Add 5+ themes, keystroke sounds, skip-nav, aria-live | Medium |
-| Security | 7.5 | Add CSP headers, session timeout warning | Small |
-| Analytics | 7 | Add per-test WPM timeline, raw/net WPM split | Medium |
-| Certification | 8 | Add LinkedIn share button, QR code on PDF | Small |
-| Performance | 6 | Add Caffeine cache with TTL, HTTP cache headers | Small |
-| Production | 7 | Add Flyway migrations, structured JSON logging | Medium |
+| Category | Was | Implemented | Status |
+|----------|-----|-------------|--------|
+| ~~Core~~ | 5 | ~~500+ word list, custom text paste, keystroke sounds~~ | ~~DONE~~ |
+| Curriculum | 6 | ~~Animated finger guide~~. Still need: more lessons per tier | PARTIAL |
+| ~~UX~~ | 6 | ~~4 accent themes (indigo/emerald/rose/amber), keystroke sounds~~ | ~~DONE~~ |
+| ~~Security~~ | 7.5 | ~~CSP headers, HSTS, session timeout warning~~ | ~~DONE~~ |
+| Analytics | 7 | Still need: per-test WPM timeline, raw/net WPM | PENDING |
+| ~~Certification~~ | 8 | ~~LinkedIn share button on certs + verify page~~ | ~~DONE~~ |
+| ~~Performance~~ | 6 | ~~HTTP cache headers (placement 1h, leaderboard 60s, public-key no-store)~~ | ~~DONE~~ |
+| Production | 7 | Still need: Flyway migrations, structured JSON logging | PENDING |
 
 ### ~~Pending (roadmap to raise score)~~ — ALL DONE
 | # | Item | Impact | Effort |
