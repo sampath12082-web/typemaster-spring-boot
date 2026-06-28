@@ -56,7 +56,10 @@ public class SecurityConfig {
                     "/api/auth/change-password",
                     "/api/auth/forgot-password",
                     "/api/certificates/**",
-                    "/actuator/health"
+                    "/actuator/health",
+                    "/api-docs/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html"
                 ).permitAll();
                 if (h2ConsoleEnabled) {
                     auth.requestMatchers("/h2-console/**").permitAll();
