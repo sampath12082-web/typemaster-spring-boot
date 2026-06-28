@@ -10,6 +10,7 @@ import com.typingtutor.security.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -358,6 +359,7 @@ public class UserService {
         return r;
     }
 
+    @Cacheable("leaderboard")
     @Transactional(readOnly = true)
     public List<Map<String, Object>> getLeaderboard() {
         return performanceRepository.findLeaderboard().stream()

@@ -9,6 +9,7 @@ import com.typingtutor.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +39,7 @@ public class PlacementService {
         this.auditLogService = auditLogService;
     }
 
+    @Cacheable("placement")
     public Map<String, Object> getPlacementTest() {
         return Map.of(
             "passage", placementPassage,

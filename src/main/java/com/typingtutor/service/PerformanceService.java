@@ -10,6 +10,7 @@ import com.typingtutor.repository.UserPerformanceRepository;
 import com.typingtutor.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class PerformanceService {
         this.auditLogService = auditLogService;
     }
 
+    @CacheEvict(value = "leaderboard", allEntries = true)
     @Transactional
     public PerformanceDto savePerformance(PerformanceRequest request, String username) {
         User user = userRepository.findByUsername(username)
