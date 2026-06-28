@@ -116,7 +116,7 @@ All error responses follow `{ "error": "message" }`. HTTP status is set by `Glob
 
 PostgreSQL everywhere — local dev and production both use it. Connection reads from env vars `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` (local defaults: `localhost:5432/typingtutor`, user `postgres`).
 
-`data-prod.sql` runs on every startup (guarded by `WHERE NOT EXISTS`) to seed 24 lessons (8 per tier), 3 exams, and the default admin user. Hibernate `ddl-auto=update` creates/migrates tables automatically.
+`data-prod.sql` runs on every startup (guarded by `WHERE NOT EXISTS`) to seed 36 lessons (12 per tier), 3 exams, and the default admin user. Hibernate `ddl-auto=update` creates/migrates tables automatically.
 
 **Schema tables:** `app_users`, `lessons`, `user_performance`, `email_verification`, `exams`, `exam_attempts`, `certificates`, `inquiries`, `audit_log`
 

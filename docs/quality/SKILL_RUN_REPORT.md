@@ -1,5 +1,5 @@
 # Skill Run Report — TypeMaster
-### Last Run: 2026-06-28 (final deep run, post all improvements) | Pending: 1 item (PracticePage E2E)
+### Last Run: 2026-06-28 (post all gap fixes) | Pending: 1 item (PracticePage E2E)
 
 ---
 
@@ -7,10 +7,10 @@
 
 | Skill | Status | Pending |
 |-------|--------|---------|
-| 1. Functionality Review | ~~ALL CLEAR — 0 findings~~ | 0 |
-| 2. App Critique | **79.5/100** | 0 (all 8 improvement categories done) |
-| 3. Doc Writer Audit | ~~All 7 checks PASS~~ | 0 |
-| 4. Project Review | ~~All 9 checks PASS~~ | 0 |
+| 1. Functionality Review | ~~14/15 PASS~~ | ~~CLAUDE.md "24 lessons" → fixed to 36~~ |
+| 2. App Critique | **80/100** | 0 |
+| 3. Doc Writer Audit | ~~All checks PASS~~ | 0 |
+| 4. Project Review | ~~All checks PASS~~ | 0 |
 | 5. Test Coverage Audit | **1 pending** | PracticePage E2E test |
 | 6. Run TypeMaster | ~~141/141 pass~~ | 0 |
 
@@ -35,24 +35,24 @@
 
 ---
 
-## Skill 2: App Critique — **79.5/100** (post all improvements)
+## Skill 2: App Critique — **80/100** (post all gap fixes)
 
-Score progression: 69 → 65 (strict deep) → **79.5** (after implementing all improvements).
+Score progression: 69 → 65 (strict deep) → 79.5 → **80** (after word lists, lessons, themes, drills).
 
 All improvements implemented. Code-verified scoring:
 
 | Category | Wt | Before | Now | Weighted | Key Evidence |
 |----------|-----|--------|-----|----------|-------------|
-| Core | 15 | 5 | **8** | 12.0 | 500+ words, custom text, time/word modes, keystroke sounds |
-| Curriculum | 15 | 6 | **8** | 12.0 | 24 lessons, AI gen, exams, finger guide, placement |
-| UX | 10 | 6 | **8** | 8.0 | 302 dark: classes, 4 accent themes, sounds, tooltips |
+| Core | 15 | 5 | **9** | 13.5 | 2.5K words (3 pools), custom text, key drill, 4 modes, sounds |
+| Curriculum | 15 | 6 | **9** | 13.5 | 36 lessons (12/tier), AI gen, exams, finger guide, key drills |
+| UX | 10 | 6 | **9** | 9.0 | 311 dark: classes, 8 accent themes, font size toggle, sounds |
 | Security | 10 | 7.5 | **9** | 9.0 | RSA-OAEP, Bucket4j, CSP+HSTS, session timeout, OTP lockout |
-| Analytics | 10 | 7 | **7** | 7.0 | WPM timeline chart, keyboard heatmap, leaderboard |
+| Analytics | 10 | 7 | **8** | 8.0 | WPM timeline, full keyboard heatmap with finger overlay |
 | Certification | 5 | 8 | **9** | 4.5 | PDF, public verify, LinkedIn share |
-| AI Features | 10 | 8 | **7** | 7.0 | AI lesson gen + help agent — unique differentiator |
-| Performance | 5 | 6 | **7** | 3.5 | @Cacheable, HTTP cache headers, Docker multi-stage |
-| Mobile | 5 | 6 | **6** | 3.0 | 44 responsive breakpoints, hamburger nav |
-| Production | 15 | 7 | **9** | 13.5 | Flyway, JSON logging, 326 tests, CI, Swagger, rate limiting |
+| AI Features | 10 | 8 | **8** | 8.0 | AI lesson gen + help agent — unique differentiator |
+| Performance | 5 | 6 | **6** | 3.0 | @Cacheable, HTTP cache headers, Docker multi-stage |
+| Mobile | 5 | 6 | **5** | 2.5 | 48 responsive classes, hamburger nav, no PWA |
+| Production | 15 | 7 | **8** | 12.0 | Flyway, JSON logging, 326 tests, CI, Swagger, rate limiting |
 
 ### Top 3 Strengths
 1. **Production-grade infrastructure** — Flyway, CI test gate, Swagger, rate limiting, CSP, structured logging, 326 tests
