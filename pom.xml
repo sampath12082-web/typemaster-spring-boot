@@ -50,11 +50,9 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!-- Flyway database migrations -->
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
+        <!-- Flyway: removed from classpath to avoid circular dependency
+             with entityManagerFactory on Render. Re-add when first real
+             migration (V2+) is needed. V1__baseline.sql is a stub. -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
