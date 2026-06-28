@@ -168,7 +168,7 @@
 ### Future Roadmap (from Critique)
 | # | Item | Impact | Effort | Status |
 |---|------|--------|--------|--------|
-| 7 | Add @Cacheable (Redis) | Perf 3→6 | Medium | PENDING |
+| ~~7~~ | ~~Add Spring Cache (@Cacheable)~~ | ~~Perf 3→6~~ | ~~Medium~~ | ~~DONE — placement + leaderboard cached, evict on save~~ |
 | ~~8~~ | ~~Rate limiting (Bucket4j)~~ | ~~Prod 7→8~~ | ~~Small~~ | ~~DONE — RateLimitFilter: login 10/min, OTP 5/10min~~ |
 | ~~9~~ | ~~Swagger/OpenAPI~~ | ~~Prod 7→8~~ | ~~Small~~ | ~~DONE — springdoc at /swagger-ui.html~~ |
 | ~~10~~ | ~~Per-key error heatmap~~ | ~~Analytics 6→8~~ | ~~Medium~~ | ~~DONE — KeyboardHeatmap on AnalyticsPage~~ |
