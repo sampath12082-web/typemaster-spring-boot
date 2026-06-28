@@ -25,4 +25,10 @@ jobs:
         run: mvn package -DskipTests -B
 
       - name: Trigger Render deploy
-        run: curl -s -o /dev/null -w "%{http_code}" -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" || true)
+          echo "Render deploy hook responded: $code"
+          if [ "$code" = "000" ] || [ "$code" = "" ]; then
+            echo "::warning::Deploy hook unreachable (HTTP $code). Trigger deploy manually from Render dashboard."
+          fi
+        continue-on-error: true
