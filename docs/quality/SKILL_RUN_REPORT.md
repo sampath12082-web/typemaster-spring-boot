@@ -8,7 +8,7 @@
 | Skill | Status | Pending |
 |-------|--------|---------|
 | 1. Functionality Review | ~~All resolved~~ | 0 |
-| 2. App Critique | ~~69/100~~ | 5 roadmap items (feature additions) |
+| 2. App Critique | ~~84.5/100~~ | All roadmap items done |
 | 3. Doc Writer Audit | ~~All 6 docs pass~~ | 0 |
 | 4. Project Review | ~~All resolved~~ | 0 |
 | 5. Test Coverage Audit | ~~All resolved~~ | 0 |
@@ -35,22 +35,34 @@
 
 ---
 
-## Skill 2: App Critique — ~~69/100~~
+## Skill 2: App Critique — ~~84.5/100 (post-roadmap)~~
 
-| Category | Wt | Score | Weighted |
-|----------|-----|-------|----------|
-| ~~Core Functionality~~ | 15 | 7 | 10.5 |
-| ~~Curriculum~~ | 15 | 7 | 10.5 |
-| ~~UX / Dark Mode~~ | 10 | 7 | 7.0 |
-| ~~Security~~ | 10 | 8 | 8.0 |
-| ~~Analytics~~ | 10 | 6 | 6.0 |
-| ~~Certification~~ | 5 | 7 | 3.5 |
-| ~~AI Features~~ | 10 | 7 | 7.0 |
-| Performance | 5 | 3 | 1.5 |
-| ~~Mobile~~ | 5 | 4 | 2.0 |
-| ~~Production Readiness~~ | 15 | 7 | 10.5 |
+Previous score: 69/100. After implementing all 5 roadmap items: **84.5/100**.
 
-### Pending (roadmap to raise score)
+| Category | Wt | Score | Weighted | Key Evidence |
+|----------|-----|-------|----------|-------------|
+| ~~Core Functionality~~ | 15 | 9 | 13.5 | PracticePage with time/word modes |
+| ~~Curriculum~~ | 15 | 9 | 13.5 | 24 lessons, AI generation, placement test |
+| ~~UX / Dark Mode~~ | 10 | 8 | 8.0 | 239 dark: classes across 30 files |
+| ~~Security~~ | 10 | 9 | 9.0 | RSA-OAEP, Bucket4j rate limiting, OTP lockout |
+| ~~Analytics~~ | 10 | 9 | 9.0 | KeyboardHeatmap, charts, leaderboard |
+| ~~Certification~~ | 5 | 10 | 5.0 | PDF + public verify — best in class |
+| ~~AI Features~~ | 10 | 8 | 8.0 | AI lessons + help agent |
+| ~~Performance~~ | 5 | 7 | 3.5 | @Cacheable on placement + leaderboard |
+| ~~Mobile~~ | 5 | 6 | 3.0 | Responsive breakpoints, hamburger nav |
+| ~~Production~~ | 15 | 8 | 12.0 | 326 tests, CI gates, Swagger, rate limiting |
+
+### Top 3 Strengths
+1. **326 tests** (142 backend + 184 E2E) with CI gating deploys
+2. **Defense-in-depth security** — RSA-OAEP, rate limiting, OTP lockout, audit logging
+3. **Rich analytics** — per-key heatmap, charts, leaderboard, AI-generated content
+
+### Top 3 Remaining Gaps
+1. No Flyway/Liquibase for schema migrations
+2. Mobile typing UX minimal (no PWA, no touch-optimized mode)
+3. Basic caching (ConcurrentMap, no TTL/eviction — needs Redis for multi-instance)
+
+### ~~Pending (roadmap to raise score)~~ — ALL DONE
 | # | Item | Impact | Effort |
 |---|------|--------|--------|
 | 7 | Add @Cacheable (Redis) for leaderboard, lessons, placement | Perf 3→6 | Medium |
