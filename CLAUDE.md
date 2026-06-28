@@ -176,6 +176,7 @@ Dark mode is fully implemented via ThemeContext with localStorage persistence (k
 | `HelpPage` | `/help` | AI assistant, support tickets, FAQ |
 | `ProfilePage` | `/profile` | User info, email, change password |
 | `AboutPage` | `/about` | App mission and features |
+| `PracticePage` | `/practice` | Custom typing tests — time (15s/30s/60s/120s) and word count (10/25/50/100) modes |
 | `AdminPage` | `/admin` | User/inquiry management, audit logs |
 
 ### Lesson progression model

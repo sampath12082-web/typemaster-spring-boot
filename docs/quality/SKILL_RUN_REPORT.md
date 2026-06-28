@@ -166,13 +166,13 @@
 | ~~15~~ | ~~5~~ | ~~AboutPage E2E smoke test (6 tests in 20-about.spec.js)~~ | ~~FIXED~~ |
 
 ### Future Roadmap (from Critique)
-| # | Item | Impact | Effort |
-|---|------|--------|--------|
-| 7 | Add @Cacheable (Redis) | Perf 3→6 | Medium |
-| 8 | Rate limiting | Prod 7→8 | Small |
-| 9 | Swagger/OpenAPI | Prod 7→8 | Small |
-| 10 | Per-key error heatmap | Analytics 6→8 | Medium |
-| 11 | Custom test modes | Core 7→9 | Medium |
+| # | Item | Impact | Effort | Status |
+|---|------|--------|--------|--------|
+| 7 | Add @Cacheable (Redis) | Perf 3→6 | Medium | PENDING |
+| ~~8~~ | ~~Rate limiting (Bucket4j)~~ | ~~Prod 7→8~~ | ~~Small~~ | ~~DONE — RateLimitFilter: login 10/min, OTP 5/10min~~ |
+| ~~9~~ | ~~Swagger/OpenAPI~~ | ~~Prod 7→8~~ | ~~Small~~ | ~~DONE — springdoc at /swagger-ui.html~~ |
+| ~~10~~ | ~~Per-key error heatmap~~ | ~~Analytics 6→8~~ | ~~Medium~~ | ~~DONE — KeyboardHeatmap on AnalyticsPage~~ |
+| ~~11~~ | ~~Custom test modes~~ | ~~Core 7→9~~ | ~~Medium~~ | ~~DONE — PracticePage with time/word modes~~ |
 
 ---
 
