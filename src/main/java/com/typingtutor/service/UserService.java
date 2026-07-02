@@ -331,7 +331,7 @@ public class UserService {
     public UserStatsDto getUserStats(User user) {
         UserStatsDto stats = new UserStatsDto();
         stats.setUsername(user.getUsername());
-        stats.setLessonsCompleted((int) performanceRepository.countDistinctLessonsByUserId(user.getId()));
+        stats.setLessonsCompleted((int) performanceRepository.countPassedLessonsByUserId(user.getId()));
         Double avgWpm = performanceRepository.findAverageWpmByUserId(user.getId());
         stats.setAverageWpm(avgWpm != null ? Math.round(avgWpm * 10.0) / 10.0 : 0.0);
         stats.setTotalCompleted((int) performanceRepository.countByUserId(user.getId()));

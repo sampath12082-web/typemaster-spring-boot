@@ -1,6 +1,6 @@
 # TypeMaster — Bug Tracker
 
-_Last updated: 2026-06-17_
+_Last updated: 2026-07-02_
 
 > **Status key:** ⏳ Open · 🔄 In Progress · ✅ Fixed · 🚫 Won't Fix · ⬇️ Deferred
 
@@ -16,6 +16,8 @@ _Last updated: 2026-06-17_
 | B-6 | ✅ Fixed | High | Placement | Placement test always submits WPM=0 and accuracy=0% — metrics not captured during the test session | 2026-06-15 | 2026-06-15 |
 | B-7 | ✅ Fixed | High | Email/OTP | Send-OTP email not working — root-caused and permanently fixed (devOtp decoupled, boolean return, Gmail SMTP, emailWarning surfaced) | 2026-06-16 | 2026-06-17 |
 | B-8 | ⬇️ Deferred | Testing | Email/OTP | No E2E test coverage for the send-OTP-email flow — blocked until a test mailbox API (Mailtrap/Mailosaur) is available | 2026-06-16 | — |
+| B-9 | ✅ Fixed | High | Dashboard | "Lessons Done" stat counted all attempted lessons, not passed ones — showed inflated/inaccurate count | 2026-07-02 | 2026-07-02 |
+| B-10 | ✅ Fixed | Medium | Help | Dark mode: "Frequently Asked Questions", "My Tickets", "Help & Support" headings invisible (missing dark: variants) | 2026-07-02 | 2026-07-02 |
 
 ---
 
@@ -87,6 +89,20 @@ _Last updated: 2026-06-17_
 **Reported:** Existing E2E tests (`10-otp.spec.js` etc.) only exercise the `devOtp` shortcut returned in the API response when `EmailService.isMailEnabled()` is false — they never verify a real email actually gets sent and received.
 **Needed:** Frontend-to-email **end-to-end** test coverage, not backend-only: trigger the OTP flow through the real UI (register / resend / forgot-password), and verify an actual email was sent and is usable — e.g. via a test mailbox/inbox API (Mailtrap, Mailosaur, or similar), or at minimum asserting against the mail server logs/send confirmation rather than the `devOtp` bypass. Should run as part of the regular Playwright suite, tagged so it can be skipped in environments without a test-mailbox provider configured.
 **Depends on:** B-7 is now fixed; this item remains deferred until a test mailbox provider is configured.
+
+---
+
+### B-9 · ✅ Fixed · "Lessons Done" shows attempted count, not passed count
+**Root cause:** `UserPerformanceRepository.countDistinctLessonsByUserId()` counts any lesson with a performance record, regardless of whether the user passed or failed it. "Lessons Done" with a ✅ should reflect passed lessons only.  
+**Fix:** Added `countPassedLessonsByUserId()` query (filters `p.wpm >= p.lesson.minWpm AND p.accuracyPercentage >= p.lesson.minAccuracy`). `UserService.getUserStats()` now uses this for `lessonsCompleted`.  
+**Files:** `UserPerformanceRepository.java`, `UserService.java`
+
+---
+
+### B-10 · ✅ Fixed · Help page headings invisible in dark mode
+**Root cause:** Three static `text-gray-800` / `text-gray-900` headings in HelpPage (`Help & Support` h1, `Frequently Asked Questions` h2, `My Tickets` h2) had no `dark:` variant. In dark mode, these rendered as near-black text on a dark gray card background — effectively invisible.  
+**Fix:** Added `dark:text-gray-100` to all three headings.  
+**Files:** `HelpPage.jsx`
 
 ---
 

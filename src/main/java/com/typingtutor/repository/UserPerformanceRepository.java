@@ -27,6 +27,12 @@ public interface UserPerformanceRepository extends JpaRepository<UserPerformance
     @Query("SELECT COUNT(DISTINCT p.lesson.id) FROM UserPerformance p WHERE p.user.id = :userId")
     long countDistinctLessonsByUserId(@Param("userId") Long userId);
 
+    @Query("SELECT COUNT(DISTINCT p.lesson.id) FROM UserPerformance p " +
+           "WHERE p.user.id = :userId " +
+           "AND p.wpm >= p.lesson.minWpm " +
+           "AND p.accuracyPercentage >= p.lesson.minAccuracy")
+    long countPassedLessonsByUserId(@Param("userId") Long userId);
+
     long countByUserId(Long userId);
 
     // Last 10 sessions for AI profiling
