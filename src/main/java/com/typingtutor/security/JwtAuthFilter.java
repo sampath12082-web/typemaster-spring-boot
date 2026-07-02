@@ -60,6 +60,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                             new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                    // Tag the request so RequestTimingFilter can log the authenticated username.
+                    request.setAttribute(
+                            com.typingtutor.config.RequestTimingFilter.AUTH_USER_ATTR,
+                            principal.getUsername());
                 }
             }
         } catch (JwtException e) {

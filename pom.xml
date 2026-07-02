@@ -50,9 +50,6 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <!-- Flyway: removed from classpath to avoid circular dependency
-             with entityManagerFactory on Render. Re-add when first real
-             migration (V2+) is needed. V1__baseline.sql is a stub. -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
@@ -100,6 +97,23 @@
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
             <version>8.10.1</version>
+        </dependency>
+        <!-- AOP — required for PerformanceLoggingAspect (@Aspect / aspectjweaver) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <!-- Caffeine cache — TTL-aware replacement for ConcurrentMapCacheManager -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <!-- Flyway: tracks schema migrations. V1 is a baseline stub (tables created by Hibernate
+             ddl-auto=update); future V2+ migrations will be managed here. Removed previously to
+             work around a classpath issue on Render; re-added once Caffeine resolved that env. -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
