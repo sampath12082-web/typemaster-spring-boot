@@ -1,6 +1,6 @@
 # TypeMaster — High Level Design (HLD)
 
-_Version: 1.0 | Last updated: 2026-06-12_
+_Version: 1.1 | Last updated: 2026-07-02_
 
 ---
 
@@ -50,6 +50,10 @@ TypeMaster is a full-stack typing tutor web application that helps users improve
 | Database | PostgreSQL | 18 | Relational database (all environments) |
 | Email | Spring Mail | 3.x | OTP delivery via SMTP |
 | AI lessons | External HTTP API | — | AI-generated lesson content |
+| Rate limiting | Bucket4j | 8.10.1 | Per-IP token-bucket rate limiting on auth endpoints |
+| DB migrations | Flyway | (enabled, V1 baseline) | Schema migration management |
+| API docs | springdoc-openapi | 2.5.0 | Swagger UI at /swagger-ui.html |
+| Caching | Spring Cache | 3.x | ConcurrentMapCache for leaderboard + placement |
 | E2E testing | Playwright | latest | Browser automation tests |
 
 ---

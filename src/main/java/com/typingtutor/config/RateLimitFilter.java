@@ -111,15 +111,21 @@ public class RateLimitFilter implements Filter {
     }
 
     /**
-     * Resolves the client IP address, respecting the {@code X-Forwarded-For} header
-     * set by reverse proxies (e.g., Render, Nginx).
+     * Resolves the client IP address from the request.
+     *
+     * <p>When running behind Render's reverse proxy, the platform appends the real
+     * client IP to {@code X-Forwarded-For}. Using the rightmost entry prevents
+     * a client from spoofing the header by prepending a fake IP.
+     *
+     * <p>Example: client sends {@code X-Forwarded-For: fake-ip} →
+     * Render appends real IP → header becomes {@code "fake-ip, real-ip"} →
+     * we take {@code "real-ip"} (rightmost).
      */
     private String resolveClientIp(HttpServletRequest request) {
         String xForwardedFor = request.getHeader("X-Forwarded-For");
         if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-            // X-Forwarded-For may contain multiple IPs: "client, proxy1, proxy2"
-            // The first one is the original client IP.
-            return xForwardedFor.split(",")[0].trim();
+            String[] parts = xForwardedFor.split(",");
+            return parts[parts.length - 1].trim();
         }
         return request.getRemoteAddr();
     }

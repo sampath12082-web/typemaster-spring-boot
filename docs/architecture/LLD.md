@@ -1,6 +1,6 @@
 # TypeMaster — Low Level Design (LLD)
 
-_Version: 1.0 | Last updated: 2026-06-12_
+_Version: 1.1 | Last updated: 2026-07-02_
 
 ---
 
@@ -29,7 +29,7 @@ app_users (
   placement_wpm         INT
 )
 
--- Lessons (24 pre-seeded via data.sql)
+-- Lessons (36 pre-seeded via data-prod.sql: 12 per tier)
 lessons (
   id                BIGINT PRIMARY KEY AUTO_INCREMENT,
   title             VARCHAR NOT NULL,
@@ -255,7 +255,7 @@ For each lesson (ordered by displayOrder):
 /certificates   ProtectedRoute  CertificatesPage
 /profile        ProtectedRoute  ProfilePage
 /leaderboard    ProtectedRoute  LeaderboardPage
-/about          (open)          AboutPage
+/about          ProtectedRoute  AboutPage
 /admin          AdminRoute      AdminPage
 / (unauth)      —               LandingPage
 ```

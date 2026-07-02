@@ -55,6 +55,7 @@ public class SecurityConfig {
                     "/api/auth/verify-otp",
                     "/api/auth/change-password",
                     "/api/auth/forgot-password",
+                    "/api/auth/leaderboard",
                     "/api/certificates/**",
                     "/actuator/health",
                     "/api-docs/**",

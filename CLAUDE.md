@@ -98,7 +98,7 @@ scripts/stop-all.bat        # kills both processes
 | `repository/` | Spring Data JPA interfaces |
 | `dto/` | Request/response shapes; never expose entities directly |
 | `security/` | JWT filter, `UserPrincipal`, `UserDetailsServiceImpl` |
-| `config/` | `SecurityConfig` (filter chain, CORS), `SpaController` (SPA fallback) |
+| `config/` | `SecurityConfig` (filter chain, CORS), `RateLimitFilter` (Bucket4j per-IP), `OpenApiConfig` (Swagger), `CacheConfig` (@EnableCaching), `SpaController` (SPA fallback) |
 
 ### Request pipeline
 
@@ -176,7 +176,7 @@ Dark mode is fully implemented via ThemeContext with localStorage persistence (k
 | `HelpPage` | `/help` | AI assistant, support tickets, FAQ |
 | `ProfilePage` | `/profile` | User info, email, change password |
 | `AboutPage` | `/about` | App mission and features |
-| `PracticePage` | `/practice` | Custom typing tests — time (15s/30s/60s/120s) and word count (10/25/50/100) modes |
+| `PracticePage` | `/practice` | Free practice — 4 modes: Time (15s/30s/60s/120s), Words (10/25/50/100), Custom Text, Key Drill; word pool selector (200/1K/2K) |
 | `AdminPage` | `/admin` | User/inquiry management, audit logs |
 
 ### Lesson progression model
@@ -188,7 +188,7 @@ Lessons unlock sequentially within a tier. Status per user is computed on the fl
 - `PASSED` — met `min_wpm` AND `min_accuracy` in at least one attempt
 - `FAILED_ATTEMPT` — attempted but not yet passing
 
-Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Failing an exam resets all lesson progress for that tier.
+Passing all 12 lessons in a tier unlocks that tier's certification **exam**. Failing an exam resets all lesson progress for that tier.
 
 ### Key services
 
@@ -213,14 +213,14 @@ Passing all 8 lessons in a tier unlocks that tier's certification **exam**. Fail
 | `JWT_SECRET` | Yes | JWT signing secret (32+ chars) |
 | `DB_URL` | No | JDBC connection URL (default: `jdbc:postgresql://localhost:5432/typingtutor`) |
 | `DB_USERNAME` | No | Database username (default: `postgres`) |
-| `DB_PASSWORD` | No | Database password (default: `postgres`) |
+| `DB_PASSWORD` | No | Database password (default: empty string) |
 | `MAIL_HOST` / `MAIL_USERNAME` / `MAIL_PASSWORD` | No | SMTP; defaults to Gmail config |
 | `AI_API_KEY` | No | Anthropic API key for AI lesson generation |
-| `CORS_ALLOWED_ORIGINS` | No | Overrides default `http://localhost:*` |
+| `CORS_ALLOWED_ORIGINS` | No | Overrides default `http://localhost:*,http://127.0.0.1:*` |
 
 ### Deployment
 
-`.github/workflows/deploy.yml` runs on every push to `main`: builds with `mvn package -DskipTests -B`, then POSTs to `${{ secrets.RENDER_DEPLOY_HOOK_URL }}` to trigger a Render deploy — there is no test gate before deploy. `Dockerfile` is a two-stage build (`maven:3.9.6-eclipse-temurin-21` → `eclipse-temurin:21-jre-alpine`), exposes port 8080.
+`.github/workflows/deploy.yml` runs on every push to `main`: runs `mvn test -B` (excluding `OtpServiceIntegrationTest`), then builds with `mvn package -DskipTests -B`, then POSTs to `${{ secrets.RENDER_DEPLOY_HOOK_URL }}` to trigger a Render deploy. `Dockerfile` is a two-stage build (`maven:3.9.6-eclipse-temurin-21` → `eclipse-temurin:21-jre-alpine`), exposes port 8080.
 
 ## Important conventions
 
