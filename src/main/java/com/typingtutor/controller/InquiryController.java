@@ -46,10 +46,13 @@ public class InquiryController {
     public ResponseEntity<Map<String, Object>> chat(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody ChatRequest req) {
-        return ResponseEntity.ok(helpAgentService.chat(req.message()));
+        return ResponseEntity.ok(helpAgentService.chat(req.message(), req.history()));
     }
 
-    record ChatRequest(@NotBlank @Size(max = 1000) String message) {}
+    record ChatRequest(
+        @NotBlank @Size(max = 1000) String message,
+        List<Map<String, String>> history
+    ) {}
 
     /** Feature E — reopen a resolved inquiry (max 3 times). */
     @PostMapping("/{id}/reopen")

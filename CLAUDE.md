@@ -118,7 +118,7 @@ PostgreSQL everywhere — local dev and production both use it. Connection reads
 
 `data-prod.sql` runs on every startup (guarded by `WHERE NOT EXISTS`) to seed 36 lessons (12 per tier), 3 exams, and the default admin user. Hibernate `ddl-auto=update` creates/migrates tables automatically.
 
-**Schema tables:** `app_users`, `lessons`, `user_performance`, `email_verification`, `exams`, `exam_attempts`, `certificates`, `inquiries`, `audit_log`
+**Schema tables:** `app_users`, `lessons`, `user_performance`, `email_verifications`, `exams`, `exam_attempts`, `certificates`, `inquiries`, `audit_logs`
 
 > `user_password` is named that way (not `password`) to avoid a reserved word conflict.
 
@@ -198,7 +198,7 @@ Passing all 12 lessons in a tier unlocks that tier's certification **exam**. Fai
 - **`OtpService`** — creates 6-digit OTPs with a 30-minute expiry; purpose enum: `VERIFY_EMAIL | FIRST_LOGIN | RESET_PASSWORD`
 - **`LessonGenerationService`** — calls Anthropic API (Claude) if `AI_API_KEY` is set; silently disabled otherwise
 - **`HelpAgentService`** — separate Anthropic-backed support chatbot; calls `https://api.anthropic.com/v1/messages` directly via `java.net.http.HttpClient` with a fixed product-knowledge system prompt, returns `{ answer, escalate }`
-- **`AuditLogService`** — logs user and admin actions to `audit_log` table; user activity retrievable via `GET /api/auth/my-activity`
+- **`AuditLogService`** — logs user and admin actions to `audit_logs` table; user activity retrievable via `GET /api/auth/my-activity`
 - **`PlacementService`** — serves the placement passage/time limit and maps WPM to starting tier (`< 20 BASIC`, `20-39 INTERMEDIATE`, `≥ 40 ADVANCED`)
 - **`AdminService`** — admin user CRUD/reset-password; deletes a user's `inquiries`/`certificates`/etc. in FK-safe order (see cascade order above)
 - **`InquiryService`** — support inquiry lifecycle (create, resolve, reopen) backing `InquiryController`

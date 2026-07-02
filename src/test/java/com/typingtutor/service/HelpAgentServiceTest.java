@@ -38,7 +38,7 @@ class HelpAgentServiceTest {
 
     @Test
     void chatReturnsPromptWhenMessageIsNull() {
-        Map<String, Object> result = helpAgentService.chat(null);
+        Map<String, Object> result = helpAgentService.chat(null, null);
 
         assertThat(result.get("answer")).isEqualTo("Please type your question.");
         assertThat(result.get("escalate")).isEqualTo(false);
@@ -46,7 +46,7 @@ class HelpAgentServiceTest {
 
     @Test
     void chatReturnsPromptWhenMessageIsEmpty() {
-        Map<String, Object> result = helpAgentService.chat("");
+        Map<String, Object> result = helpAgentService.chat("", null);
 
         assertThat(result.get("answer")).isEqualTo("Please type your question.");
         assertThat(result.get("escalate")).isEqualTo(false);
@@ -54,7 +54,7 @@ class HelpAgentServiceTest {
 
     @Test
     void chatReturnsPromptWhenMessageIsBlank() {
-        Map<String, Object> result = helpAgentService.chat("   ");
+        Map<String, Object> result = helpAgentService.chat("   ", null);
 
         assertThat(result.get("answer")).isEqualTo("Please type your question.");
         assertThat(result.get("escalate")).isEqualTo(false);
@@ -66,7 +66,7 @@ class HelpAgentServiceTest {
     void chatReturnsFallbackWhenApiKeyIsEmpty() {
         ReflectionTestUtils.setField(helpAgentService, "aiApiKey", "");
 
-        Map<String, Object> result = helpAgentService.chat("How do I reset my password?");
+        Map<String, Object> result = helpAgentService.chat("How do I reset my password?", null);
 
         assertThat(result.get("answer")).asString()
                 .contains("AI assistant is not available");
@@ -77,7 +77,7 @@ class HelpAgentServiceTest {
     void chatReturnsFallbackWhenApiKeyIsBlank() {
         ReflectionTestUtils.setField(helpAgentService, "aiApiKey", "   ");
 
-        Map<String, Object> result = helpAgentService.chat("What is WPM?");
+        Map<String, Object> result = helpAgentService.chat("What is WPM?", null);
 
         assertThat(result.get("answer")).asString()
                 .contains("AI assistant is not available");
@@ -88,14 +88,14 @@ class HelpAgentServiceTest {
 
     @Test
     void fallbackResponseContainsRequiredKeys() {
-        Map<String, Object> result = helpAgentService.chat("Tell me about certificates");
+        Map<String, Object> result = helpAgentService.chat("Tell me about certificates", null);
 
         assertThat(result).containsKeys("answer", "escalate");
     }
 
     @Test
     void nullInputResponseContainsRequiredKeys() {
-        Map<String, Object> result = helpAgentService.chat(null);
+        Map<String, Object> result = helpAgentService.chat(null, null);
 
         assertThat(result).containsKeys("answer", "escalate");
     }

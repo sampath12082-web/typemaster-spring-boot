@@ -11,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class HelpAgentService {
             Account settings: Update email, full name, date of birth, student/professional status from Profile page.
 
             Support tickets: Submit on the Help page (subject + message). Admin responds within 24 hours for escalated issues.
-            Backspace: Disabled by design during typing practice — errors stay to build discipline.
+            Backspace: Disabled by default during lessons and exams — errors stay to build discipline. In free Practice mode, users can toggle backspace on via the "Backspace: on/off" switch.
 
             Data saving: Progress saves automatically when a lesson completes. Ensure you are logged in.
             Logout: Available in the top navigation bar on every page.
@@ -66,7 +67,7 @@ public class HelpAgentService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public Map<String, Object> chat(String userMessage) {
+    public Map<String, Object> chat(String userMessage, List<Map<String, String>> history) {
         if (userMessage == null || userMessage.isBlank()) {
             return Map.of("answer", "Please type your question.", "escalate", false);
         }
@@ -78,11 +79,23 @@ public class HelpAgentService {
             );
         }
         try {
+            List<Map<String, Object>> messages = new ArrayList<>();
+            if (history != null) {
+                for (Map<String, String> h : history) {
+                    String role    = h.get("role");
+                    String content = h.get("content");
+                    if (role != null && content != null && !content.isBlank()) {
+                        messages.add(Map.of("role", role, "content", content));
+                    }
+                }
+            }
+            messages.add(Map.of("role", "user", "content", userMessage));
+
             String requestBody = objectMapper.writeValueAsString(Map.of(
                 "model", aiModel,
                 "max_tokens", 512,
                 "system", SYSTEM_PROMPT,
-                "messages", List.of(Map.of("role", "user", "content", userMessage))
+                "messages", messages
             ));
 
             HttpRequest request = HttpRequest.newBuilder()

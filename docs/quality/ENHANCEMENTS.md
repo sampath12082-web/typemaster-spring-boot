@@ -1,6 +1,6 @@
 # TypeMaster — Enhancement Tracker
 
-_Last updated: 2026-06-17_
+_Last updated: 2026-07-02_
 
 > **Status key:** ⏳ Pending · 🔄 In Progress · ✅ Done · 🚫 Won't Fix · ⬇️ Deferred
 
@@ -24,6 +24,11 @@ _Last updated: 2026-06-17_
 | E-14 | ✅ Done | Email | `yourtypemaster@gmail.com` now configured as sender in all environments; Gmail SMTP standardized; Brevo references removed | 2026-06-16 | 2026-06-17 |
 | E-15 | ✅ Done | Certificates | Certificates now use full name with username fallback in both PDF generation and email notification | 2026-06-16 | 2026-06-17 |
 | E-16 | ⬇️ Deferred | Certificates | Certificate visual template blocked — `CertificateService` overlay code is fully wired; only the PNG asset (`src/main/resources/templates/certificate-template.png`) is missing from the repo | 2026-06-16 | — |
+| E-17 | ✅ Done | Testing | React unit tests (Vitest + RTL): 12 tests for `useTyping.js` + 4 tests for `TypingEngine.jsx`; setup in `vite.config.js`; `npm test` command added | 2026-07-02 | 2026-07-02 |
+| E-18 | ✅ Done | Practice | Configurable backspace in Practice mode — "Backspace" toggle in PracticePage (localStorage `tt_strict_mode`); disabled by default (strict); when on, backspace un-types last char and restores accuracy | 2026-07-02 | 2026-07-02 |
+| E-19 | ✅ Done | UX | Smooth animated caret cursor in typing engine — replaced `.char-current` background highlight with a 2px blinking vertical bar (CSS `::before` pseudo-element + `blink` keyframe); caret appears before the current character like Monkeytype | 2026-07-02 | 2026-07-02 |
+| E-20 | ✅ Done | Performance | Caffeine cache with TTL replaces ConcurrentMapCacheManager — `leaderboard` cache: 60s TTL, max 1000 entries; `placement` cache: 1h TTL, max 10 entries; RateLimitFilter unbounded-memory risk mitigated | 2026-07-02 | 2026-07-02 |
+| E-21 | ✅ Done | AI | Multi-turn HelpAgent conversation memory — frontend sends last 10 messages as history; backend threads them into the Anthropic messages array; chat context maintained across the session without server-side storage | 2026-07-02 | 2026-07-02 |
 
 ---
 
